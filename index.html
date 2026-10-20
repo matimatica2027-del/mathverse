@@ -263,5 +263,87 @@ function navigate() {
 window.addEventListener("hashchange", navigate);
 navigate();
 </script>
+  <script>
+(() => {
+  const panel = document.querySelector("#materials .panel");
+  const empty = panel.querySelector(".empty");
+
+  const filters = document.createElement("div");
+  filters.style.cssText =
+    "display:flex;flex-wrap:wrap;gap:16px;margin:22px 0";
+
+  function createSelect(title, values) {
+    const label = document.createElement("label");
+    label.style.cssText =
+      "display:flex;flex-direction:column;gap:8px;flex:1;min-width:160px";
+
+    const text = document.createElement("span");
+    text.textContent = title;
+    text.style.cssText = "font-size:14px;color:#666780";
+
+    const select = document.createElement("select");
+    select.style.cssText =
+      "width:100%;padding:13px;border:1px solid #d9cdf8;" +
+      "border-radius:12px;background:#faf8ff;color:#14133e;" +
+      "font:inherit";
+
+    values.forEach(value => {
+      select.add(new Option(value, value));
+    });
+
+    label.append(text, select);
+    filters.append(label);
+    return select;
+  }
+
+  const term = createSelect("Тоқсан", [
+    "I тоқсан", "II тоқсан", "III тоқсан", "IV тоқсан"
+  ]);
+
+  const subject = createSelect("Пән", ["Математика"]);
+
+  const topic = createSelect("Тақырып", [
+    "Тақырыптар жақында қосылады"
+  ]);
+  topic.disabled = true;
+
+  panel.insertBefore(filters, empty);
+
+  const status = document.createElement("p");
+  status.style.cssText =
+    "font-size:14px;color:#7135ef;margin-bottom:10px";
+  empty.insertBefore(status, empty.lastElementChild);
+
+  function updateStatus() {
+    const grade = document.querySelector(".grade.selected").dataset.grade;
+    status.textContent =
+      grade + "-сынып · " + term.value + " · " + subject.value;
+  }
+
+  function updateSubjects() {
+    const grade = Number(
+      document.querySelector(".grade.selected").dataset.grade
+    );
+
+    const values = grade <= 6
+      ? ["Математика"]
+      : grade <= 9
+      ? ["Алгебра", "Геометрия"]
+      : ["Алгебра және анализ бастамалары", "Геометрия"];
+
+    subject.replaceChildren();
+    values.forEach(value => subject.add(new Option(value, value)));
+    updateStatus();
+  }
+
+  document.querySelectorAll(".grade").forEach(button => {
+    button.addEventListener("click", updateSubjects);
+  });
+
+  term.addEventListener("change", updateStatus);
+  subject.addEventListener("change", updateStatus);
+  updateSubjects();
+})();
+  </script>
 </body>
 </html>
