@@ -444,5 +444,36 @@ navigate();
     0 4px 10px #7135ef25;
 }
   </style>
+  <style>
+.art.math-picture {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.art.math-picture::before {
+  display: none;
+}
+.art.math-picture img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+</style>
+
+<script>
+(() => {
+  const art = document.querySelector(".art");
+  const picture = new Image();
+
+  picture.alt = "";
+  picture.src = "./Screenshot_20261020_232501_Chrome.jpg";
+
+  picture.onload = () => {
+    art.replaceChildren(picture);
+    art.classList.add("math-picture");
+  };
+})();
+</script>
 </body>
 </html>
