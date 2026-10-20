@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#7135ef">
+<title>MATHVERSE — Математика әлемі</title>
+<style>
+*{box-sizing:border-box}
+:root{--purple:#7135ef;--ink:#14133e;--muted:#666780}
+body{margin:0;font-family:Arial,sans-serif;color:var(--ink);background:#fafaff}
+button,a{-webkit-tap-highlight-color:transparent}
+button{font:inherit;cursor:pointer}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1200px;margin:auto;padding:0 28px}
+header{display:flex;align-items:center;justify-content:space-between;gap:20px;padding-top:26px;padding-bottom:26px}
+.brand{font-size:27px;font-weight:900;letter-spacing:2px;display:flex;align-items:center;gap:12px}
+.logo{background:linear-gradient(135deg,#ad86ff,#6530df);color:white;border-radius:12px;padding:9px 12px;letter-spacing:0}
+nav{display:flex;gap:8px}
+nav a{padding:12px 16px;border-radius:14px;font-size:15px}
+nav a:hover,nav a.active{background:#ece5ff;color:var(--purple)}
+.hero{display:grid;grid-template-columns:1.1fr 1fr;align-items:center;min-height:390px;gap:20px;padding:25px 0}
+h1{font-size:clamp(36px,4.6vw,62px);line-height:1.12;letter-spacing:-2px;margin:0 0 22px}
+h1 span{color:var(--purple)}
+.subtitle{font-size:19px;line-height:1.6;color:var(--muted);margin-bottom:28px}
+.primary{display:inline-block;background:linear-gradient(120deg,#873aff,#6323ed);color:white;padding:17px 25px;border:0;border-radius:30px;box-shadow:0 12px 28px #7135ef24}
+.art{height:330px;position:relative;isolation:isolate}
+.art:before{content:"";position:absolute;inset:12%;background:#ddd1ff;filter:blur(50px);border-radius:50%;z-index:-1}
+.orb{position:absolute;width:125px;height:125px;border-radius:50%;left:12%;top:150px;background:radial-gradient(circle at 28% 22%,#fff,#c5baff 28%,#9072ee 65%,#6040bc);box-shadow:18px 24px 30px #6040bc26}
+.ring{position:absolute;width:205px;height:205px;border:48px solid #ae97f3;border-radius:50%;left:33%;top:52px;transform:rotate(-28deg) skew(-12deg);box-shadow:inset 8px 9px 15px #ffffffbb,12px 18px 25px #7750c833}
+.cube{position:absolute;width:105px;height:105px;right:3%;top:165px;border:2px solid #fff9;border-radius:12px;background:linear-gradient(135deg,#e9e0ffdd,#9d83ea);transform:rotate(-12deg);box-shadow:inset 12px 12px 20px #ffffff88,12px 20px 30px #7750c833}
+.symbol{position:absolute;color:#956ee9;font-family:Georgia,serif;text-shadow:2px 3px 0 #e1d5ff}
+.pi{font-size:72px;left:14%;top:12px}
+.root{font-size:48px;right:2%;top:25px}
+.sum{font-size:49px;left:52%;bottom:0}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin:20px 0 26px}
+.card{background:white;border:1px solid #ede8fc;border-radius:22px;padding:24px 12px;text-align:center;color:var(--ink);box-shadow:0 9px 30px #6452ac08;transition:transform .2s,box-shadow .2s}
+.card:hover{transform:translateY(-5px);box-shadow:0 15px 30px #7135ef16}
+.card.selected{border-color:var(--purple);background:#f5f0ff}
+.card svg{width:112px;height:105px;display:block;margin:0 auto 17px;filter:drop-shadow(0 8px 6px #7352bf22)}
+.card strong{font-size:17px;display:block}
+.grades{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;padding:0 0 30px}
+.grade{background:transparent;border:1px solid #d9cdf8;border-radius:25px;padding:12px 24px;color:#555478}
+.grade.selected{background:var(--purple);border-color:var(--purple);color:white}
+.panel{background:white;border:1px solid #eae3fa;border-radius:22px;padding:28px;margin:0 0 35px}
+.panel h2{margin:0 0 12px;font-size:23px}
+.panel p{color:var(--muted);line-height:1.7;margin:0}
+.empty{text-align:center;padding:28px 12px}
+.empty-icon{font-size:35px;margin-bottom:12px}
+.tag{display:inline-block;background:#f0e9ff;color:var(--purple);padding:7px 13px;border-radius:20px;font-size:13px;margin-bottom:12px}
+footer{border-top:1px solid #e9e2fa;background:#f2eeff;padding:23px 0}
+.foot{display:flex;align-items:center;justify-content:space-between;gap:15px;color:#646184;font-size:14px}
+.foot b{letter-spacing:2px;color:var(--ink)}
+[hidden]{display:none!important}
+:focus-visible{outline:3px solid #a982ff;outline-offset:4px}
+@media(max-width:760px){
+.wrap{padding:0 18px}
+header{flex-wrap:wrap;padding-top:20px;padding-bottom:12px}
+.brand{font-size:23px}
+nav{width:100%;justify-content:center}
+nav a{padding:10px;font-size:13px}
+.hero{grid-template-columns:1fr;gap:0;padding-top:25px}
+h1{letter-spacing:-1px}
+.subtitle{font-size:16px}
+.art{height:260px;max-width:420px;width:100%;margin:auto}
+.ring{top:25px;width:170px;height:170px;border-width:39px}
+.orb{top:115px;width:105px;height:105px}
+.cube{top:125px;width:85px;height:85px}
+.pi{top:0;font-size:58px}
+.cards{grid-template-columns:repeat(2,1fr);gap:12px;margin-top:5px}
+.card{padding:18px 8px}
+.card strong{font-size:14px;line-height:1.4}
+.card svg{width:90px;height:85px}
+.grade{padding:10px 16px;font-size:14px}
+.foot{flex-direction:column;text-align:center}
+}
+@media(prefers-reduced-motion:reduce){.card{transition:none}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" aria-hidden="true" style="position:absolute">
+<defs>
+<linearGradient id="lav" x2="1" y2="1">
+<stop stop-color="#f1eaff"/><stop offset="1" stop-color="#b495f4"/>
+</linearGradient>
+<linearGradient id="deep" x2="1" y2="1">
+<stop stop-color="#b18aff"/><stop offset="1" stop-color="#7135ef"/>
+</linearGradient>
+<linearGradient id="gold" x2="1" y2="1">
+<stop stop-color="#ffe8a0"/><stop offset="1" stop-color="#f3ad37"/>
+</linearGradient>
+<symbol id="worksheet" viewBox="0 0 120 110">
+<rect x="22" y="15" width="70" height="86" rx="10" fill="#ded0fa" transform="rotate(-9 55 55)"/>
+<rect x="28" y="8" width="70" height="86" rx="10" fill="url(#lav)" stroke="#fff" stroke-width="3"/>
+<path d="M41 28h42M53 44h30M53 60h25M53 76h29" stroke="#a083d8" stroke-width="4" stroke-linecap="round"/>
+<path d="M40 40h7v7h-7zM40 56h7v7h-7zM40 72h7v7h-7z" fill="white"/>
+<path d="m82 80 20-39 9 5-20 39-12 8z" fill="url(#deep)" stroke="#fff" stroke-width="2"/>
+</symbol>
+<symbol id="slides" viewBox="0 0 120 110">
+<path d="M60 80v23M60 90l-23 13M60 90l23 13" stroke="#9371dc" stroke-width="5" stroke-linecap="round"/>
+<rect x="12" y="14" width="96" height="65" rx="5" fill="url(#lav)" stroke="#fff" stroke-width="3"/>
+<path d="M10 13h100M10 80h100" stroke="url(#deep)" stroke-width="8" stroke-linecap="round"/>
+<rect x="26" y="47" width="10" height="23" rx="2" fill="#ad88f5"/>
+<rect x="42" y="35" width="10" height="35" rx="2" fill="#8550df"/>
+<path d="M79 30a20 20 0 1 0 20 20H79z" fill="#9875e8"/>
+<path d="M83 26v20h20a20 20 0 0 0-20-20" fill="#8cbeff"/>
+</symbol>
+<symbol id="quest" viewBox="0 0 120 110">
+<path d="M27 55V32q0-10 10-10h45q10 0 10 10v23" fill="url(#deep)" stroke="#d9c5ff" stroke-width="4"/>
+<rect x="22" y="58" width="76" height="40" rx="8" fill="url(#lav)" stroke="#ae86ef" stroke-width="3"/>
+<path d="M23 72h74M38 60v36M81 60v36" stroke="#9470d8" stroke-width="4"/>
+<rect x="53" y="70" width="15" height="18" rx="5" fill="url(#gold)"/>
+<path d="m61 29 7 14 16 2-12 11 3 16-14-8-14 8 3-16-12-11 16-2z" fill="url(#gold)" stroke="#fff0b8" stroke-width="2"/>
+<rect x="5" y="31" width="25" height="28" rx="6" fill="#d6e7ff" transform="rotate(-15 18 45)"/>
+<text x="11" y="51" font-size="22" font-family="Arial" font-weight="bold" fill="#7460d5">3</text>
+<rect x="90" y="13" width="25" height="28" rx="6" fill="#e0d3ff" transform="rotate(14 102 27)"/>
+<text x="96" y="35" font-size="22" font-family="Arial" font-weight="bold" fill="#7460d5">7</text>
+<path d="m14 7 2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="#efbb5b"/>
+<circle cx="103" cy="82" r="14" fill="#b090ef" stroke="#eee3ff" stroke-width="3"/>
+<circle cx="103" cy="82" r="7" fill="#7c4bd0"/>
+<path d="m103 82 13-16" stroke="#7960ce" stroke-width="4" stroke-linecap="round"/>
+</symbol>
+<symbol id="assessment" viewBox="0 0 120 110">
+<rect x="25" y="13" width="68" height="84" rx="11" fill="url(#lav)" stroke="white" stroke-width="3"/>
+<path d="M48 37h29M48 53h29M48 69h22" stroke="#a184dc" stroke-width="4" stroke-linecap="round"/>
+<rect x="35" y="33" width="7" height="7" rx="2" fill="#98adf1"/>
+<rect x="35" y="49" width="7" height="7" rx="2" fill="#98adf1"/>
+<rect x="35" y="65" width="7" height="7" rx="2" fill="#98adf1"/>
+<circle cx="91" cy="24" r="21" fill="url(#deep)" stroke="#dfcaff" stroke-width="3"/>
+<text x="77" y="31" fill="white" font-size="21" font-family="Arial" font-weight="bold">A+</text>
+</symbol>
+</defs>
+</svg>
+
+<header class="wrap">
+<a class="brand" href="#home" aria-label="MATHVERSE басты бет">
+<span class="logo">M</span>MATHVERSE
+</a>
+<nav aria-label="Негізгі мәзір">
+<a href="#home" class="active" data-nav="home">Басты бет</a>
+<a href="#materials" data-nav="materials">Материалдар</a>
+<a href="#author" data-nav="author">Автор туралы</a>
+</nav>
+</header>
+
+<main class="wrap">
+<section class="hero" id="home">
+<div>
+<h1>Математиканы<br><span>қызықты оқыт!</span></h1>
+<p class="subtitle">Ұстазға қажетті материалдар — бір жерде</p>
+<a class="primary" href="#materials">Материалдарды қарау &nbsp; →</a>
+</div>
+<div class="art" aria-hidden="true">
+<div class="ring"></div>
+<div class="orb"></div>
+<div class="cube"></div>
+<span class="symbol pi">π</span>
+<span class="symbol root">√x</span>
+<span class="symbol sum">∑</span>
+</div>
+</section>
+
+<section id="materials" aria-label="Оқу материалдары">
+<div class="cards">
+<button class="card selected" data-type="Жұмыс парақтары" aria-pressed="true">
+<svg aria-hidden="true"><use href="#worksheet"/></svg>
+<strong>Жұмыс парақтары</strong>
+</button>
+<button class="card" data-type="Презентациялар" aria-pressed="false">
+<svg aria-hidden="true"><use href="#slides"/></svg>
+<strong>Презентациялар</strong>
+</button>
+<button class="card" data-type="Интерактивті ойындар" aria-pressed="false">
+<svg aria-hidden="true"><use href="#quest"/></svg>
+<strong>Интерактивті ойындар</strong>
+</button>
+<button class="card" data-type="БЖБ, ТЖБ" aria-pressed="false">
+<svg aria-hidden="true"><use href="#assessment"/></svg>
+<strong>БЖБ, ТЖБ</strong>
+</button>
+</div>
+
+<div class="grades" aria-label="Сыныпты таңдау">
+<button class="grade selected" data-grade="5" aria-pressed="true">5-сынып</button>
+<button class="grade" data-grade="6" aria-pressed="false">6-сынып</button>
+<button class="grade" data-grade="7" aria-pressed="false">7-сынып</button>
+<button class="grade" data-grade="8" aria-pressed="false">8-сынып</button>
+<button class="grade" data-grade="9" aria-pressed="false">9-сынып</button>
+<button class="grade" data-grade="10" aria-pressed="false">10-сынып</button>
+<button class="grade" data-grade="11" aria-pressed="false">11-сынып</button>
+</div>
+
+<div class="panel" aria-live="polite">
+<span class="tag" id="grade-label">5-сынып</span>
+<h2 id="section-title">Жұмыс парақтары</h2>
+<div class="empty">
+<div class="empty-icon" aria-hidden="true">✦</div>
+<p>Бұл бөлімге материалдар жақында қосылады.</p>
+</div>
+</div>
+</section>
+
+<section class="panel" id="author" hidden>
+<span class="tag">Платформа авторы</span>
+<h2>Қонысғали Нұрасыл</h2>
+<p>Математика пәнінің мұғалімі.</p>
+<p>MATHVERSE — мұғалімдерге арналған жұмыс парақтары,
+презентациялар және интерактивті ойындар платформасы.</p>
+</section>
+</main>
+
+<footer>
+<div class="wrap foot">
+<b>MATHVERSE</b>
+<span>Авторы: Қонысғали Нұрасыл</span>
+<span>Математика әлемі</span>
+</div>
+</footer>
+
+<script>
+const cards = document.querySelectorAll(".card");
+const grades = document.querySelectorAll(".grade");
+
+cards.forEach(card => {
+  card.addEventListener("click", () => {
+    cards.forEach(item => {
+      const chosen = item === card;
+      item.classList.toggle("selected", chosen);
+      item.setAttribute("aria-pressed", String(chosen));
+    });
+    document.getElementById("section-title").textContent = card.dataset.type;
+  });
+});
+
+grades.forEach(grade => {
+  grade.addEventListener("click", () => {
+    grades.forEach(item => {
+      const chosen = item === grade;
+      item.classList.toggle("selected", chosen);
+      item.setAttribute("aria-pressed", String(chosen));
+    });
+    document.getElementById("grade-label").textContent =
+      grade.dataset.grade + "-сынып";
+  });
+});
+
+function navigate() {
+  const page = ["#materials", "#author"].includes(location.hash)
+    ? location.hash.slice(1)
+    : "home";
+
+  document.getElementById("home").hidden = page === "author";
+  document.getElementById("materials").hidden = page === "author";
+  document.getElementById("author").hidden = page !== "author";
+
+  document.querySelectorAll("[data-nav]").forEach(link => {
+    const current = link.dataset.nav === page;
+    link.classList.toggle("active", current);
+    if (current) link.setAttribute("aria-current", "page");
+    else link.removeAttribute("aria-current");
+  });
+}
+window.addEventListener("hashchange", navigate);
+navigate();
+</script>
+</body>
+</html>
