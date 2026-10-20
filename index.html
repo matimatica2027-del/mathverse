@@ -345,5 +345,104 @@ navigate();
   updateSubjects();
 })();
   </script>
+  <style>
+.art {
+  perspective: 800px;
+}
+
+.ring {
+  background: transparent;
+  border-color: #b39af5;
+  transform: rotate(-28deg) skew(-12deg);
+  box-shadow:
+    inset 6px 6px 10px #ffffff,
+    inset -8px -8px 14px #7854c9,
+    4px 4px 0 #9d7de4,
+    8px 8px 0 #9472db,
+    12px 12px 0 #8965d1,
+    20px 28px 30px #7050b538;
+}
+
+.orb {
+  background: radial-gradient(
+    circle at 30% 24%,
+    #ffffff 0%,
+    #e6e0ff 12%,
+    #b9a8f5 35%,
+    #9374de 65%,
+    #6542ae 100%
+  );
+  box-shadow:
+    inset -8px -10px 18px #6240aa55,
+    14px 24px 25px #7050b538;
+}
+
+.cube {
+  overflow: visible;
+  background: linear-gradient(
+    135deg,
+    #f2edff 0%,
+    #c9b7f5 35%,
+    #9978de 100%
+  );
+  border: 2px solid #eee5ff;
+  border-radius: 5px;
+  transform: rotate(-12deg) skewY(7deg);
+  box-shadow:
+    inset 8px 8px 18px #ffffff80,
+    18px 24px 30px #7050b530;
+}
+
+.cube::before {
+  content: "";
+  position: absolute;
+  top: -20px;
+  left: -2px;
+  right: -2px;
+  height: 18px;
+  background: linear-gradient(110deg,#ede5ff,#b99aee);
+  border: 1px solid #eee5ff;
+  transform: skewX(-45deg);
+  transform-origin: bottom;
+}
+
+.cube::after {
+  content: "";
+  position: absolute;
+  top: -2px;
+  right: -20px;
+  width: 17px;
+  height: calc(100% + 4px);
+  background: linear-gradient(#c0a5ef,#8661c9);
+  border: 1px solid #e7d8ff;
+  transform: skewY(-45deg);
+  transform-origin: left;
+}
+
+.card {
+  background: linear-gradient(145deg,#ffffff,#faf7ff);
+  box-shadow:
+    inset 0 1px 0 #ffffff,
+    0 10px 26px #7352bf0d;
+}
+
+.card svg {
+  filter:
+    drop-shadow(1px 2px 0 #d9c8f3)
+    drop-shadow(0 8px 6px #7352bf26);
+}
+
+.card.selected {
+  background: linear-gradient(145deg,#faf7ff,#eee5ff);
+  box-shadow: 0 8px 24px #7135ef16;
+}
+
+.logo {
+  background: linear-gradient(135deg,#c397ff,#8547ed 55%,#5924c6);
+  box-shadow:
+    inset 2px 2px 4px #ffffff60,
+    0 4px 10px #7135ef25;
+}
+  </style>
 </body>
 </html>
