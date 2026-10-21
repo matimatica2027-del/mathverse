@@ -2333,6 +2333,123 @@ card.append(title, details, download, feedback);
   });
 })();
   </script>
+  <script>
+(() => {
+  const client = window.mvClient;
+  const panel = document.querySelector("#materials .panel");
+  const selects = panel?.querySelectorAll("select");
+  if (!client || !selects || selects.length < 3) return;
+
+  const [term, subject, topic] = selects;
+  const categories = {
+    "Жұмыс парақтары": "worksheet",
+    "Презентациялар": "presentation",
+    "Интерактивті ойындар": "game",
+    "БЖБ, ТЖБ": "assessment"
+  };
+  let version = 0;
+
+  function reset(text) {
+    topic.replaceChildren(new Option(text, ""));
+    topic.disabled = true;
+  }
+
+  async function updateTopics() {
+    const current = ++version;
+    reset("Тақырыптар жүктелуде…");
+
+    try {
+      const { data: sessionData, error: sessionError } =
+        await client.auth.getSession();
+      if (current !== version) return;
+      if (sessionError) throw sessionError;
+
+      if (!sessionData.session) {
+        reset("Алдымен аккаунтқа кіріңіз");
+        return;
+      }
+      if (term.selectedIndex !== 1) {
+        reset("II тоқсанды таңдаңыз");
+        return;
+      }
+
+      const grade = Number(
+        document.querySelector(".grade.selected")?.dataset.grade
+      );
+      const type =
+        document.querySelector(".card.selected")?.dataset.type;
+      const subjectName =
+        subject.value === "Алгебра және анализ бастамалары"
+          ? "Алгебра" : subject.value;
+
+      const topics = new Set();
+      let offset = 0;
+
+      while (true) {
+        const { data, error } = await client
+          .from("mathverse_materials")
+          .select("id,topic")
+          .eq("grade", grade)
+          .eq("term", 2)
+          .eq("subject", subjectName)
+          .eq("category", categories[type])
+          .order("id")
+          .range(offset, offset + 499);
+
+        if (current !== version) return;
+        if (error) throw error;
+
+        data.forEach(item => topics.add(item.topic));
+        if (data.length < 500) break;
+        offset += 500;
+      }
+
+      topic.replaceChildren(
+        new Option("Барлық тақырыптар", "")
+      );
+
+      [...topics]
+        .sort((a, b) => a.localeCompare(b, "kk"))
+        .forEach(name => {
+          topic.add(new Option(name, name));
+        });
+
+      topic.disabled = topics.size === 0;
+      if (!topics.size) {
+        reset("Қолжетімді тақырыптар әзірге жоқ");
+      }
+
+      topic.dispatchEvent(
+        new Event("change", { bubbles: true })
+      );
+    } catch (error) {
+      if (current === version) {
+        reset("Тақырыптар жүктелмеді");
+      }
+    }
+  }
+
+  panel.addEventListener("change", event => {
+    if (event.target === term || event.target === subject) {
+      updateTopics();
+    }
+  });
+
+  document.querySelectorAll(".grade, .card[data-type]")
+    .forEach(button => {
+      button.addEventListener("click", updateTopics);
+    });
+
+  client.auth.onAuthStateChange(() => {
+    version++;
+    reset("Тақырыптар тексерілуде…");
+    setTimeout(updateTopics, 0);
+  });
+
+  window.addEventListener("focus", updateTopics);
+  updateTopics();
+})();
+  </script>
  
 </body>
 </html>
