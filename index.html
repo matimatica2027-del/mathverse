@@ -684,5 +684,184 @@ navigate();
     );
 })();
 </script>
+  <style>
+#mv-account {
+  position:fixed; right:16px; bottom:20px; z-index:1000;
+  background:#7135ef; color:white; border:0;
+  border-radius:30px; padding:14px 22px;
+  font:600 15px Arial; box-shadow:0 6px 24px #7135ef40;
+}
+#mv-login {
+  width:min(420px,92vw); box-sizing:border-box;
+  border:1px solid #e7dcff; border-radius:24px;
+  padding:28px; color:#14133e; background:#fff;
+}
+#mv-login::backdrop { background:#14133e80; }
+#mv-login h2 { margin:0 0 12px; }
+#mv-login p { line-height:1.6; font-size:14px; }
+#mv-login label { display:block; margin:16px 0; }
+#mv-login input {
+  display:block; width:100%; box-sizing:border-box;
+  margin-top:7px; padding:13px; font-size:16px;
+  border:1px solid #ddd1f5; border-radius:12px;
+}
+#mv-login button {
+  padding:12px 16px; border:0; border-radius:12px;
+  background:#f0e9ff; color:#5421b3; cursor:pointer;
+}
+#mv-login button:disabled { opacity:.5; }
+#mv-login .mv-primary { background:#7135ef; color:#fff; }
+#mv-close { float:right; }
+#mv-message { white-space:pre-line; overflow-wrap:anywhere; }
+</style>
+
+<button id="mv-account" type="button">Кіру / Тіркелу</button>
+
+<dialog id="mv-login" aria-labelledby="mv-title">
+  <button id="mv-close" type="button" aria-label="Жабу">✕</button>
+  <h2 id="mv-title">MATHVERSE</h2>
+  <p>Ұстаздың жеке кабинеті</p>
+
+  <form id="mv-form">
+    <label>
+      Электрондық пошта
+      <input id="mv-email" type="email"
+        autocomplete="email" required>
+    </label>
+    <label>
+      Құпиясөз — кемінде 8 таңба
+      <input id="mv-password" type="password"
+        autocomplete="current-password" minlength="8" required>
+    </label>
+    <button class="mv-primary" type="submit">Кіру</button>
+    <button id="mv-register" type="button">Тіркелу</button>
+  </form>
+
+  <p id="mv-message" role="status" aria-live="polite"></p>
+  <button id="mv-logout" type="button" hidden>
+    Аккаунттан шығу
+  </button>
+</dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(() => {
+  const byId = id => document.getElementById(id);
+  const dialog = byId("mv-login");
+  const form = byId("mv-form");
+  const message = byId("mv-message");
+  const account = byId("mv-account");
+  const logout = byId("mv-logout");
+
+  account.onclick = () => dialog.showModal();
+  byId("mv-close").onclick = () => dialog.close();
+
+  if (!window.supabase) {
+    form.hidden = true;
+    message.textContent =
+      "Кіру қызметі жүктелмеді. Интернетті тексеріп, бетті жаңартыңыз.";
+    return;
+  }
+
+  const client = window.supabase.createClient(
+    "https://innodjadccddhxxuvwsm.supabase.co",
+    "sb_publishable_6yWac_cMIjWZFgzi6obeCA_Cg6r4MlP"
+  );
+
+  function showSession(session) {
+    const signedIn = Boolean(session);
+    form.hidden = signedIn;
+    logout.hidden = !signedIn;
+    account.textContent = signedIn
+      ? "Жеке кабинет" : "Кіру / Тіркелу";
+
+    if (signedIn) {
+      byId("mv-password").value = "";
+      message.textContent =
+        "Аккаунт: " + session.user.email +
+        "\nМатериалдарға кіру үшін төлем тексеріліп, автор рұқсат береді." +
+        "\nII тоқсан: 01.11.2026–26.12.2026.";
+    } else {
+      message.textContent = "";
+    }
+  }
+
+  function readableError(error) {
+    if (error.code === "invalid_credentials")
+      return "Email немесе құпиясөз дұрыс емес.";
+    if (error.code === "email_not_confirmed")
+      return "Алдымен поштаңызға келген растау сілтемесін ашыңыз.";
+    if (error.status === 429)
+      return "Сұрау көп жіберілді. Біраздан кейін қайталаңыз.";
+    return "Орындалмады: " + error.message;
+  }
+
+  let busy = false;
+
+  async function authenticate(register) {
+    if (busy || !form.reportValidity()) return;
+    busy = true;
+    form.querySelectorAll("button").forEach(b => b.disabled = true);
+    message.textContent = "Күте тұрыңыз…";
+
+    try {
+      const credentials = {
+        email: byId("mv-email").value.trim(),
+        password: byId("mv-password").value
+      };
+
+      const result = register
+        ? await client.auth.signUp({
+            ...credentials,
+            options: {
+              emailRedirectTo:
+                "https://matimatica2027-del.github.io/mathverse/"
+            }
+          })
+        : await client.auth.signInWithPassword(credentials);
+
+      if (result.error) throw result.error;
+
+      byId("mv-password").value = "";
+
+      if (result.data.session) {
+        showSession(result.data.session);
+      } else {
+        message.textContent =
+          "Поштаңызды тексеріңіз. Растау хаты келсе, сілтемесін ашып, кейін «Кіру» батырмасын басыңыз.";
+      }
+    } catch (error) {
+      message.textContent = readableError(error);
+    } finally {
+      busy = false;
+      form.querySelectorAll("button").forEach(b => b.disabled = false);
+    }
+  }
+
+  form.onsubmit = event => {
+    event.preventDefault();
+    authenticate(false);
+  };
+
+  byId("mv-register").onclick = () => authenticate(true);
+
+  logout.onclick = async () => {
+    logout.disabled = true;
+    try {
+      const { error } = await client.auth.signOut();
+      if (error) throw error;
+      showSession(null);
+    } catch (error) {
+      message.textContent = readableError(error);
+    } finally {
+      logout.disabled = false;
+    }
+  };
+
+  client.auth.onAuthStateChange((_event, session) => {
+    showSession(session);
+  });
+})();
+    </script>
 </body>
 </html>
