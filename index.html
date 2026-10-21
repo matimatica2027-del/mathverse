@@ -1330,6 +1330,107 @@ navigate();
   });
 })();
 </script>
+  <script>
+(() => {
+  const client = window.mvClient;
+  const login = document.getElementById("mv-login");
+  if (!client || !login) return;
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = "Құпиясөзді ұмыттыңыз ба?";
+  button.style.cssText =
+    "display:block;margin:16px 0;padding:10px;color:#7135ef";
+  login.append(button);
+
+  button.onclick = async () => {
+    const input = document.getElementById("mv-email");
+    const email = prompt(
+      "Тіркелген электрондық поштаңызды жазыңыз:",
+      input?.value || ""
+    );
+    if (!email?.trim()) return;
+
+    button.disabled = true;
+    try {
+      const { error } = await client.auth.resetPasswordForEmail(
+        email.trim(),
+        {
+          redirectTo:
+            "https://matimatica2027-del.github.io/mathverse/"
+        }
+      );
+      if (error) throw error;
+      alert("Қалпына келтіру хаты сұратылды. Поштаңызды және «Спам» бөлімін тексеріңіз.");
+    } catch (error) {
+      alert("Хат жіберілмеді: " + error.message);
+    } finally {
+      button.disabled = false;
+    }
+  };
+
+  const dialog = document.createElement("dialog");
+  dialog.style.cssText =
+    "border:0;border-radius:20px;padding:24px;width:min(90vw,400px)";
+  dialog.innerHTML = `
+    <form>
+      <h3>Жаңа құпиясөз</h3>
+      <input type="password" minlength="8" required
+        autocomplete="new-password"
+        placeholder="Кемінде 8 таңба"
+        style="box-sizing:border-box;width:100%;padding:12px">
+      <input type="password" minlength="8" required
+        autocomplete="new-password"
+        placeholder="Құпиясөзді қайталаңыз"
+        style="box-sizing:border-box;width:100%;padding:12px;margin-top:12px">
+      <p role="status"></p>
+      <button type="submit">Сақтау</button>
+      <button type="button" data-close>Жабу</button>
+    </form>`;
+  document.body.append(dialog);
+
+  dialog.querySelector("[data-close]").onclick =
+    () => dialog.close();
+
+  function openRecovery() {
+    if (login.open) login.close();
+    if (!dialog.open) dialog.showModal();
+  }
+
+  client.auth.onAuthStateChange(event => {
+    if (event === "PASSWORD_RECOVERY") {
+      setTimeout(openRecovery, 0);
+    }
+  });
+
+  dialog.querySelector("form").onsubmit = async event => {
+    event.preventDefault();
+    const inputs = dialog.querySelectorAll("input");
+    const message = dialog.querySelector("p");
+    const save = dialog.querySelector('[type="submit"]');
+
+    if (inputs[0].value !== inputs[1].value) {
+      message.textContent = "Құпиясөздер сәйкес келмейді.";
+      return;
+    }
+
+    save.disabled = true;
+    message.textContent = "Сақталуда…";
+    try {
+      const { error } = await client.auth.updateUser({
+        password: inputs[0].value
+      });
+      if (error) throw error;
+      inputs.forEach(input => input.value = "");
+      message.textContent = "Құпиясөз өзгертілді!";
+    } catch (error) {
+      message.textContent = error.message;
+    } finally {
+      save.disabled = false;
+    }
+  };
+})();
+  </script>
  
 </body>
 </html>
