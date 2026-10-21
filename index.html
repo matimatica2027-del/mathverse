@@ -1465,26 +1465,46 @@ if (isAdmin === true) {
     font-weight:bold;
     text-decoration:none;
   `;
+  let accountEmail = "";
+  const client = window.mvClient;
 
   function updateLink() {
-    const email =
+    const email = accountEmail ||
       document.getElementById("mv-email")?.value.trim() || "";
 
     const message =
       "Сәлеметсіз бе! MATHVERSE платформасының " +
-      "II тоқсан материалдарына қолжетімділік сатып алғым келеді." +
-      (email ? "\nТіркелген поштам: " + email : "");
+      "II тоқсан материалдарына қолжетімділік алғым келеді." +
+      "\nБағасы: 3000 ₸." +
+      (email ? "\nТіркелген поштам: " + email : "") +
+      "\nТөлем чегін осы хабарламаға тіркеп жіберемін.";
 
     link.href =
       "https://wa.me/77786418203?text=" +
       encodeURIComponent(message);
   }
 
+  if (client) {
+    let authChanged = false;
+
+    client.auth.getSession().then(({ data, error }) => {
+      if (error || authChanged) return;
+      accountEmail = data.session?.user?.email || "";
+      updateLink();
+    });
+
+    client.auth.onAuthStateChange((_event, session) => {
+      authChanged = true;
+      accountEmail = session?.user?.email || "";
+      updateLink();
+    });
+  }
+
   updateLink();
   document.getElementById("mv-email")
     ?.addEventListener("input", updateLink);
-
   link.addEventListener("click", updateLink);
+  
   cabinet.append(link);
 })();
   </script>
