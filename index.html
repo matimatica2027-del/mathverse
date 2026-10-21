@@ -599,10 +599,10 @@ navigate();
   const input = document.createElement("input");
   input.type = "search";
   input.placeholder = "Мысалы: жай бөлшектер";
-  input.disabled = true;
+  input.disabled = false;
 
   const hint = document.createElement("small");
-  hint.textContent = "Материалдар қосылғанда іздеу қолжетімді болады.";
+  hint.textContent = "Материал атауын немесе тақырыпты жазыңыз.";
   hint.style.color = "#666780";
 
   label.append(title, input, hint);
@@ -1648,20 +1648,32 @@ if (isAdmin === true) {
           ? "Алгебра"
           : subject.value;
 
-      const { data, error } = await client
-      .from("mathverse_materials")
-.select("id,title,topic,subject,grade,published,file_path")
-        .eq("grade", grade)
-        .eq("term", 2)
-        .eq("subject", subjectName)
-        .eq("category", categories[type])
-        .match(topic.value && !topic.disabled
-  ? { topic: topic.value }
-  : {})
-        .order("created_at", { ascending: false })
-        .order("id")
-        .range(offset, offset + 50);
+const searchText = (
+  panel.querySelector(".material-search input")?.value || ""
+)
+  .replace(/[^\p{L}\p{N}\s]/gu, " ")
+  .trim()
+  .replace(/\s+/g, "%");
 
+const pattern = "%" + searchText + "%";
+
+const { data, error } = await client
+  .from("mathverse_materials")
+  .select("id,title,topic,subject,grade,published,file_path")
+  .eq("grade", grade)
+  .eq("term", 2)
+  .eq("subject", subjectName)
+  .eq("category", categories[type])
+  .match(topic.value && !topic.disabled
+    ? { topic: topic.value }
+    : {})
+  .or(
+    "title.ilike." + pattern +
+    ",topic.ilike." + pattern
+  )
+  .order("created_at", { ascending: false })
+  .order("id")
+  .range(offset, offset + 50);
       if (request !== sequence) return;
       if (error) throw error;
 
@@ -1829,7 +1841,18 @@ card.append(title, details, download, feedback);
     box.replaceChildren();
     setTimeout(refresh, 0);
   });
+const searchInput =
+  panel.querySelector(".material-search input");
 
+let searchTimer;
+
+searchInput?.addEventListener("input", () => {
+  clearTimeout(searchTimer);
+  sequence++;
+  box.replaceChildren();
+
+  searchTimer = setTimeout(refresh, 350);
+});
   window.addEventListener("focus", refresh);
   refresh();
 })();
