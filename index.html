@@ -763,7 +763,7 @@ navigate();
     return;
   }
 
-  const client = window.supabase.createClient(
+    const client = window.mvClient = window.supabase.createClient(
     "https://innodjadccddhxxuvwsm.supabase.co",
     "sb_publishable_6yWac_cMIjWZFgzi6obeCA_Cg6r4MlP"
   );
@@ -863,5 +863,83 @@ navigate();
   });
 })();
     </script>
+  <script>
+(() => {
+  const client = window.mvClient;
+  const dialog = document.getElementById("mv-login");
+  if (!client || !dialog) return;
+
+  const status = document.createElement("p");
+  status.id = "mv-access-status";
+  status.style.cssText =
+    "padding:14px;background:#f3edff;border-radius:12px;line-height:1.7";
+  status.hidden = true;
+  document.getElementById("mv-message").after(status);
+
+  let request = 0;
+
+  async function refreshAccess() {
+    const current = ++request;
+    status.hidden = true;
+
+    try {
+      const { data: sessionData, error: sessionError } =
+        await client.auth.getSession();
+      if (sessionError) throw sessionError;
+
+      const session = sessionData.session;
+      if (current !== request || !session) return;
+
+      status.hidden = false;
+      status.textContent = "Рұқсат тексерілуде…";
+
+      const { data, error } = await client
+        .from("teacher_access")
+        .select("approved, opens_at, closes_at")
+        .eq("user_id", session.user.id)
+        .maybeSingle();
+
+      if (current !== request) return;
+      if (error) throw error;
+
+      if (!data || !data.approved) {
+        status.textContent =
+          "Рұқсат әлі берілмеген. Төлемді автор тексергеннен кейін рұқсат беріледі.";
+        return;
+      }
+
+      const formatDate = value =>
+        new Intl.DateTimeFormat("kk-KZ", {
+          timeZone: "Asia/Almaty",
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false
+        }).format(new Date(value));
+
+      status.textContent =
+        "✓ Автор рұқсат берді.\n" +
+        "Ашылуы: " + formatDate(data.opens_at) + "\n" +
+        "Жабылуы: " + formatDate(data.closes_at) + "\n" +
+        "Қазақстан уақыты.";
+      status.style.whiteSpace = "pre-line";
+    } catch (error) {
+      if (current !== request) return;
+      status.hidden = false;
+      status.textContent =
+        "Рұқсатты тексеру орындалмады. Терезені жауып, қайта ашыңыз.";
+    }
+  }
+
+  document.getElementById("mv-account")
+    .addEventListener("click", refreshAccess);
+
+  client.auth.onAuthStateChange(() => {
+    setTimeout(refreshAccess, 0);
+  });
+})();
+  </script>
 </body>
 </html>
