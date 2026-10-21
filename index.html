@@ -2499,18 +2499,76 @@ const lessons6 = Array.from({ length: 40 }, (_, i) => {
   return n + "-сабақ. " + title;
 });
 
+const lessons7Algebra = Array.from({ length: 24 }, (_, i) => {
+  const n = i + 1;
+  let title;
+
+  if (n <= 2) {
+    title = "Функция және функцияның графигі";
+  } else if (n <= 5) {
+    title = "Сызықтық функция және оның графигі";
+  } else if (n <= 8) {
+    title = "Сызықтық функциялардың графиктерінің өзара орналасуы";
+  } else if (n <= 11) {
+    title = "Екі айнымалысы бар сызықтық теңдеулер жүйесін графиктік тәсілмен шешу";
+  } else if (n <= 15) {
+    title = "y = ax², y = ax³ және y = k/x (k ≠ 0) түріндегі функциялар, олардың графиктері және қасиеттері";
+  } else if (n === 16) {
+    title = "Вариациялық қатар";
+  } else if (n <= 18) {
+    title = "Абсолютті жиілік және салыстырмалы жиілік. Жиілік кестесі";
+  } else {
+    title = "Жиілік алқабы";
+  }
+
+  if (n === 11) title += ". БЖБ №3";
+  if (n === 20) title += ". БЖБ №4";
+  if (n === 22) title = "Тоқсан бойынша жиынтық бағалау №2";
+
+  return n + "-сабақ. " + title;
+});
+
+const lessons7Geometry = Array.from({ length: 16 }, (_, i) => {
+  const n = i + 1;
+  let title;
+
+  if (n === 1) {
+    title = "Үшбұрыш және оның түрлері";
+  } else if (n <= 6) {
+    title = "Үшбұрыштың биссектрисасы, медианасы, биіктігі және орта сызығы";
+  } else if (n <= 9) {
+    title = "Үшбұрыштар теңдігінің белгілері";
+  } else {
+    title = "Теңбүйірлі үшбұрыш, оның қасиеттері және белгілері";
+  }
+
+  if (n === 13) title += ". БЖБ №2";
+  if (n === 15) title = "Тоқсан бойынша жиынтық бағалау №2";
+
+  return n + "-сабақ. " + title;
+});
+
 let curriculumTopics = [];
+const isAssessment = categories[type] === "assessment";
 
 if (subjectName === "Математика") {
   if (grade === 5) {
-    curriculumTopics = categories[type] === "assessment"
+    curriculumTopics = isAssessment
       ? [lessons5[15], lessons5[33], lessons5[37]]
       : lessons5;
   } else if (grade === 6) {
-    curriculumTopics = categories[type] === "assessment"
+    curriculumTopics = isAssessment
       ? [lessons6[19], lessons6[34], lessons6[36]]
       : lessons6;
   }
+} else if (grade === 7 && subjectName === "Алгебра") {
+  curriculumTopics = isAssessment
+    ? [lessons7Algebra[10], lessons7Algebra[19], lessons7Algebra[21]]
+    : lessons7Algebra;
+} else if (grade === 7 && subjectName === "Геометрия") {
+  curriculumTopics = isAssessment
+    ? [lessons7Geometry[12], lessons7Geometry[14]]
+    : lessons7Geometry;
 }
 
 const topics = new Set(curriculumTopics);
