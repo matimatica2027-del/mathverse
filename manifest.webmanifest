@@ -1,0 +1,19 @@
+{
+  "id": "/mathverse/",
+  "name": "MATHVERSE — Математика әлемі",
+  "short_name": "MATHVERSE",
+  "lang": "kk",
+  "start_url": "/mathverse/",
+  "scope": "/mathverse/",
+  "display": "standalone",
+  "background_color": "#fafaff",
+  "theme_color": "#7135ef",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
