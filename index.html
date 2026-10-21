@@ -2570,7 +2570,54 @@ if (subjectName === "Математика") {
     ? [lessons7Geometry[12], lessons7Geometry[14]]
     : lessons7Geometry;
 }
+const lessons8Algebra = Array.from({ length: 24 }, (_, i) => {
+  const n = i + 1;
+  let title;
 
+  if (n <= 2) {
+    title = "Квадрат теңдеу";
+  } else if (n <= 9) {
+    title = "Квадрат теңдеулерді шешу";
+  } else if (n <= 13) {
+    title = "Квадрат үшмүше";
+  } else {
+    title = "Теңдеулерді шешу";
+  }
+
+  if (n === 9) title += ". БЖБ №2";
+  if (n === 20) title += ". БЖБ №3";
+  if (n === 22) title = "Тоқсан бойынша жиынтық бағалау №2";
+
+  return n + "-сабақ. " + title;
+});
+
+const lessons8Geometry = Array.from({ length: 16 }, (_, i) => {
+  const n = i + 1;
+  let title;
+
+  if (n <= 4) {
+    title = "Тікбұрышты үшбұрыштың сүйір бұрыштарының тригонометриялық функциялары. Пифагор теоремасы";
+  } else if (n <= 11) {
+    title = "Негізгі тригонометриялық тепе-теңдіктер";
+  } else {
+    title = "Тікбұрышты үшбұрыштарды шешу";
+  }
+
+  if (n === 13) title += ". БЖБ №2";
+  if (n === 15) title = "Тоқсан бойынша жиынтық бағалау №2";
+
+  return n + "-сабақ. " + title;
+});
+
+if (grade === 8 && subjectName === "Алгебра") {
+  curriculumTopics = isAssessment
+    ? [lessons8Algebra[8], lessons8Algebra[19], lessons8Algebra[21]]
+    : lessons8Algebra;
+} else if (grade === 8 && subjectName === "Геометрия") {
+  curriculumTopics = isAssessment
+    ? [lessons8Geometry[12], lessons8Geometry[14]]
+    : lessons8Geometry;
+    }
 const topics = new Set(curriculumTopics);
       let offset = 0;
 
