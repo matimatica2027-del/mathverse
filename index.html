@@ -1717,6 +1717,224 @@ navigate();
   refresh();
 })();
                                 </script>
+  <style>
+#mv-material-admin {
+  border:0;
+  border-radius:20px;
+  padding:22px;
+  width:min(540px, calc(100vw - 24px));
+  max-height:calc(100dvh - 32px);
+  overflow-y:auto;
+  color:#14133e;
+}
+#mv-material-admin label {
+  display:block;
+  margin:14px 0;
+}
+#mv-material-admin input,
+#mv-material-admin select {
+  display:block;
+  box-sizing:border-box;
+  width:100%;
+  margin-top:6px;
+  padding:12px;
+  border:1px solid #d9cdf8;
+  border-radius:10px;
+  font:inherit;
+  font-size:16px;
+}
+#mv-material-admin button,
+#mv-material-admin-open {
+  padding:12px 16px;
+  margin-top:12px;
+  border:0;
+  border-radius:12px;
+  background:#eee6ff;
+  color:#7135ef;
+  font:inherit;
+  cursor:pointer;
+}
+</style>
+
+<script>
+(() => {
+  const client = window.mvClient;
+  const login = document.getElementById("mv-login");
+  if (!client || !login ||
+      document.getElementById("mv-material-admin")) return;
+
+  const open = document.createElement("button");
+  open.id = "mv-material-admin-open";
+  open.type = "button";
+  open.textContent = "Материалдарды басқару";
+  open.hidden = true;
+  login.append(open);
+
+  const dialog = document.createElement("dialog");
+  dialog.id = "mv-material-admin";
+  dialog.innerHTML = `
+    <button type="button" data-close>Жабу ×</button>
+    <h2>Материалдарды басқару</h2>
+    <p>II тоқсан · Жоба қосу</p>
+    <form>
+      <label>Материал атауы
+        <input name="title" required maxlength="200">
+      </label>
+      <label>Сынып
+        <select name="grade">
+          <option>5</option><option>6</option>
+          <option>7</option><option>8</option>
+          <option>9</option><option>10</option>
+          <option>11</option>
+        </select>
+      </label>
+      <label>Пән
+        <select name="subject"></select>
+      </label>
+      <label>Тақырып
+        <input name="topic" required maxlength="200">
+      </label>
+      <label>Материал түрі
+        <select name="category">
+          <option value="worksheet">Жұмыс парақтары</option>
+          <option value="presentation">Презентациялар</option>
+          <option value="game">Интерактивті ойындар</option>
+          <option value="assessment">БЖБ, ТЖБ</option>
+        </select>
+      </label>
+      <label>Storage ішіндегі файл жолы
+        <input name="file_path" required
+          placeholder="Мысалы: grade5/fractions.pdf">
+      </label>
+      <p>Файл term2-materials жабық қоймасына
+         бөлек жүктеледі. Мұнда оның жолы жазылады.</p>
+      <button type="submit">Жоба ретінде сақтау</button>
+    </form>
+    <p data-status role="status"></p>
+  `;
+  document.body.append(dialog);
+
+  const form = dialog.querySelector("form");
+  const status = dialog.querySelector("[data-status]");
+  const grade = form.elements.namedItem("grade");
+  const subject = form.elements.namedItem("subject");
+  let version = 0;
+
+  function subjects() {
+    const names = Number(grade.value) <= 6
+      ? ["Математика"]
+      : ["Алгебра", "Геометрия"];
+    subject.replaceChildren();
+    names.forEach(name => {
+      const label = name === "Алгебра" &&
+        Number(grade.value) >= 10
+        ? "Алгебра және анализ бастамалары" : name;
+      subject.add(new Option(label, name));
+    });
+  }
+  grade.onchange = subjects;
+  subjects();
+
+  dialog.querySelector("[data-close]").onclick =
+    () => dialog.close();
+
+  async function checkAdmin() {
+    const current = ++version;
+    open.hidden = true;
+    try {
+      const { data: sessionData } =
+        await client.auth.getSession();
+      if (!sessionData.session) return;
+      const { data, error } =
+        await client.rpc("mathverse_is_admin");
+      if (current !== version) return;
+      open.hidden = Boolean(error) || data !== true;
+    } catch {
+      open.hidden = true;
+    }
+  }
+
+  open.onclick = async () => {
+    await checkAdmin();
+    if (open.hidden) return;
+    login.close();
+    status.textContent = "";
+    if (!dialog.open) dialog.showModal();
+    dialog.scrollTop = 0;
+  };
+
+  form.onsubmit = async event => {
+    event.preventDefault();
+    const current = version;
+    const save = form.querySelector('[type="submit"]');
+    const values = new FormData(form);
+    const filePath = String(values.get("file_path")).trim();
+
+    if (/^https?:/i.test(filePath) ||
+        filePath.startsWith("/") ||
+        filePath.split("/").some(part =>
+          !part || part === "." || part === "..")) {
+      status.textContent =
+        "Сілтеме емес, қойма ішіндегі файл жолын жазыңыз.";
+      return;
+    }
+
+    save.disabled = true;
+    status.textContent = "Сақталуда…";
+
+    try {
+      const { data: admin, error: adminError } =
+        await client.rpc("mathverse_is_admin");
+      if (adminError) throw adminError;
+      if (current !== version) return;
+      if (admin !== true) throw new Error("Рұқсат жоқ.");
+
+      const { error } = await client
+        .from("mathverse_materials")
+        .insert({
+          title: String(values.get("title")).trim(),
+          grade: Number(values.get("grade")),
+          term: 2,
+          subject: values.get("subject"),
+          topic: String(values.get("topic")).trim(),
+          category: values.get("category"),
+          file_path: filePath,
+          published: false
+        });
+
+      if (current !== version) return;
+      if (error) throw error;
+      status.textContent =
+        "Жоба сақталды. Мұғалімдерге әлі жарияланған жоқ.";
+      form.reset();
+      subjects();
+    } catch (error) {
+      if (current === version) {
+        status.textContent = error.code === "23505"
+          ? "Бұл файл жолымен материал бұрын қосылған."
+          : "Сақталмады: " + error.message;
+      }
+    } finally {
+      save.disabled = false;
+    }
+  };
+
+  client.auth.onAuthStateChange(() => {
+    version++;
+    open.hidden = true;
+    dialog.close();
+    form.reset();
+    subjects();
+    status.textContent = "";
+    setTimeout(checkAdmin, 0);
+  });
+
+  login.addEventListener("toggle", () => {
+    if (login.open) checkAdmin();
+  });
+  checkAdmin();
+})();
+        </script>
  
 </body>
 </html>
