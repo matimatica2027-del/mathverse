@@ -541,5 +541,21 @@ navigate();
   );
 })();
   </script>
+  <script>
+(() => {
+  const icon = document.querySelector(
+    '.card[data-type="БЖБ, ТЖБ"] svg'
+  );
+  const picture = new Image();
+
+  picture.alt = "";
+  picture.className = "category-picture";
+  picture.onload = () => icon.replaceWith(picture);
+
+  picture.src = "./" + encodeURIComponent(
+    "Перламутровый оценочный лист с бейджем A+.png"
+  );
+})();
+  </script>
 </body>
 </html>
