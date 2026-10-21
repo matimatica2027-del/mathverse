@@ -2776,6 +2776,32 @@ if ("serviceWorker" in navigator) {
   login.append(help);
 })();
   </script>
+  <script>
+(() => {
+  const help = document.getElementById("mv-help");
+  if (!help || document.getElementById("mv-install-help")) return;
+
+  const section = document.createElement("section");
+  section.id = "mv-install-help";
+  section.innerHTML = `
+    <h3 style="font-size:16px;color:#7135ef">
+      Телефонға орнату
+    </h3>
+    <p><b>Android:</b> сайтты Chrome браузерінде ашыңыз.
+      Жоғарғы оң жақтағы ⋮ мәзірін басып,
+      «Добавить на главный экран» тармағын таңдаңыз.
+      Содан кейін «Установить» немесе «Создать ярлык» басыңыз.</p>
+    <p><b>iPhone:</b> сайтты Safari браузерінде ашыңыз.
+      «Поделиться» батырмасын басып,
+      «На экран Домой» тармағын таңдаңыз.
+      «Добавить» басыңыз.</p>
+    <p>Орнатқаннан кейін телефон экранындағы
+      <b>MATHVERSE</b> белгішесі арқылы кіріңіз.
+      Материалдарды ашу үшін интернет қажет.</p>
+  `;
+  help.append(section);
+})();
+  </script>
  
 </body>
 </html>
