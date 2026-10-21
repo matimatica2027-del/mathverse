@@ -1086,5 +1086,249 @@ navigate();
   checkAccess();
 })();
 </script>
+  <style>
+#mv-admin {
+  width:min(720px,94vw); max-height:85vh;
+  box-sizing:border-box; overflow:auto;
+  border:1px solid #e5d9ff; border-radius:22px;
+  padding:24px; color:#14133e; background:white;
+}
+#mv-admin::backdrop { background:#14133e80; }
+#mv-admin button, #mv-admin-open {
+  border:0; border-radius:12px; padding:12px 16px;
+  background:#eee5ff; color:#5421b3; cursor:pointer;
+}
+#mv-admin button:disabled { opacity:.5; cursor:default; }
+#mv-admin input {
+  box-sizing:border-box; width:100%;
+  border:1px solid #ddd1f5; border-radius:12px;
+  padding:12px; margin:12px 0; font-size:16px;
+}
+.mv-teacher {
+  padding:16px 0; border-bottom:1px solid #eee;
+  overflow-wrap:anywhere;
+}
+.mv-teacher p { margin:8px 0; }
+#mv-admin-message { white-space:pre-line; }
+</style>
+
+<dialog id="mv-admin" aria-labelledby="mv-admin-title">
+  <button id="mv-admin-close" type="button"
+    style="float:right" aria-label="Жабу">✕</button>
+  <h2 id="mv-admin-title">Әкімші панелі</h2>
+  <p>Төлемді тексергеннен кейін рұқсат беріңіз.</p>
+
+  <form id="mv-admin-search">
+    <input id="mv-admin-query" type="search"
+      placeholder="Ұстаздың email-ін іздеу"
+      aria-label="Email бойынша іздеу">
+    <button type="submit">Іздеу / Жаңарту</button>
+  </form>
+
+  <p id="mv-admin-message" role="status"></p>
+  <div id="mv-admin-list"></div>
+  <p>
+    <button id="mv-admin-prev" type="button">← Алдыңғы</button>
+    <button id="mv-admin-next" type="button">Келесі →</button>
+  </p>
+</dialog>
+
+<script>
+(() => {
+  const client = window.mvClient;
+  const get = id => document.getElementById(id);
+  if (!client || !get("mv-login")) return;
+
+  const dialog = get("mv-admin");
+  const list = get("mv-admin-list");
+  const message = get("mv-admin-message");
+  const open = document.createElement("button");
+  open.id = "mv-admin-open";
+  open.type = "button";
+  open.textContent = "Әкімші панелі";
+  open.hidden = true;
+  get("mv-login").append(open);
+
+  let offset = 0;
+  let search = "";
+  let epoch = 0;
+  let busy = false;
+  let admin = false;
+  let rowCount = 0;
+
+  function controls() {
+    dialog.querySelectorAll("button").forEach(b => {
+      if (b.id !== "mv-admin-close") b.disabled = busy;
+    });
+    get("mv-admin-prev").disabled = busy || offset === 0;
+    get("mv-admin-next").disabled = busy || rowCount < 50;
+    list.querySelectorAll("[data-unconfirmed]").forEach(b => {
+      b.disabled = true;
+    });
+  }
+
+  async function load() {
+    if (busy || !admin) return;
+    const version = epoch;
+    busy = true;
+    list.replaceChildren();
+    message.textContent = "Жүктелуде…";
+    controls();
+
+    try {
+      const { data, error } = await client.rpc(
+        "mathverse_list_teachers",
+        { p_search: search, p_offset: offset }
+      );
+      if (version !== epoch) return;
+      if (error) throw error;
+
+      rowCount = (data || []).length;
+      message.textContent = rowCount
+        ? "Көрсетілгені: " + rowCount
+        : "Ұстаз табылмады.";
+
+      for (const teacher of data || []) {
+        const row = document.createElement("div");
+        row.className = "mv-teacher";
+
+        const email = document.createElement("strong");
+        email.textContent = teacher.email;
+
+        const state = document.createElement("p");
+        state.textContent = !teacher.confirmed
+          ? "Поштасы әлі расталмаған"
+          : teacher.approved
+            ? "✓ Рұқсат берілген"
+            : "Рұқсат берілмеген";
+
+        const action = document.createElement("button");
+        action.type = "button";
+        action.textContent = teacher.approved
+          ? "Рұқсатты тоқтату" : "Рұқсат беру";
+
+        if (!teacher.confirmed) {
+          action.dataset.unconfirmed = "true";
+        }
+
+        action.onclick = async () => {
+          if (busy || !admin) return;
+
+          const approve = !teacher.approved;
+          const question = teacher.email + "\n" +
+            (approve
+              ? "Төлемі тексерілді ме? Рұқсат берілсін бе?"
+              : "Материалдарға рұқсаты тоқтатылсын ба?");
+
+          if (!window.confirm(question)) return;
+
+          const changeVersion = epoch;
+          busy = true;
+          message.textContent = "Сақталуда…";
+          controls();
+
+          try {
+            const { error } = await client.rpc(
+              "mathverse_set_access",
+              {
+                p_user_id: teacher.user_id,
+                p_approved: approve
+              }
+            );
+            if (error) throw error;
+          } catch (error) {
+            if (changeVersion === epoch) {
+              message.textContent =
+                "Сақталмады: " + error.message;
+            }
+            return;
+          } finally {
+            if (changeVersion === epoch) {
+              busy = false;
+              controls();
+            }
+          }
+
+          if (changeVersion === epoch) await load();
+        };
+
+        row.append(email, state, action);
+        list.append(row);
+      }
+    } catch (error) {
+      if (version === epoch) {
+        message.textContent =
+          "Тізім ашылмады: " + error.message;
+      }
+    } finally {
+      if (version === epoch) {
+        busy = false;
+        controls();
+      }
+    }
+  }
+
+  async function checkAdmin() {
+    const version = ++epoch;
+    admin = false;
+    busy = false;
+    open.hidden = true;
+    list.replaceChildren();
+    message.textContent = "";
+    dialog.close();
+
+    try {
+      const { data: sessionData, error: sessionError } =
+        await client.auth.getSession();
+      if (sessionError) throw sessionError;
+      if (version !== epoch || !sessionData.session) return;
+
+      const { data, error } =
+        await client.rpc("mathverse_is_admin");
+
+      if (version !== epoch) return;
+      if (error) throw error;
+      admin = data === true;
+      open.hidden = !admin;
+    } catch (error) {
+      open.hidden = true;
+    }
+  }
+
+  open.onclick = () => {
+    get("mv-login").close();
+    dialog.showModal();
+    offset = 0;
+    search = get("mv-admin-query").value.trim();
+    load();
+  };
+
+  get("mv-admin-close").onclick = () => dialog.close();
+
+  get("mv-admin-search").onsubmit = event => {
+    event.preventDefault();
+    if (busy) return;
+    search = get("mv-admin-query").value.trim();
+    offset = 0;
+    load();
+  };
+
+  get("mv-admin-prev").onclick = () => {
+    if (busy) return;
+    offset = Math.max(0, offset - 50);
+    load();
+  };
+
+  get("mv-admin-next").onclick = () => {
+    if (busy) return;
+    offset += 50;
+    load();
+  };
+
+  client.auth.onAuthStateChange(() => {
+    setTimeout(checkAdmin, 0);
+  });
+})();
+</script>
 </body>
 </html>
