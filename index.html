@@ -557,5 +557,55 @@ navigate();
   );
 })();
   </script>
+  <style>
+.material-search {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 22px 0;
+}
+.material-search span {
+  font-size: 14px;
+  color: #666780;
+}
+.material-search input {
+  width: 100%;
+  padding: 15px 18px;
+  border: 1px solid #d9cdf8;
+  border-radius: 14px;
+  background: #faf8ff;
+  color: #14133e;
+  font: inherit;
+}
+.material-search input:focus {
+  outline: 2px solid #a982ff;
+  outline-offset: 2px;
+}
+</style>
+
+<script>
+(() => {
+  const panel = document.querySelector("#materials .panel");
+  const empty = panel.querySelector(".empty");
+
+  const label = document.createElement("label");
+  label.className = "material-search";
+
+  const title = document.createElement("span");
+  title.textContent = "Тақырып бойынша іздеу";
+
+  const input = document.createElement("input");
+  input.type = "search";
+  input.placeholder = "Мысалы: жай бөлшектер";
+  input.disabled = true;
+
+  const hint = document.createElement("small");
+  hint.textContent = "Материалдар қосылғанда іздеу қолжетімді болады.";
+  hint.style.color = "#666780";
+
+  label.append(title, input, hint);
+  panel.insertBefore(label, empty);
+})();
+</script>
 </body>
 </html>
