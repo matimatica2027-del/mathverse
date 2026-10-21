@@ -1935,6 +1935,134 @@ navigate();
   checkAdmin();
 })();
         </script>
+  <script>
+(() => {
+  const client = window.mvClient;
+  const dialog = document.getElementById("mv-material-admin");
+  const form = dialog?.querySelector("form");
+  if (!client || !form ||
+      document.getElementById("mv-upload-file")) return;
+
+  const path = form.elements.namedItem("file_path");
+  const save = form.querySelector('[type="submit"]');
+  const status = dialog.querySelector("[data-status]");
+
+  const label = document.createElement("label");
+  label.textContent = "Файл таңдау";
+
+  const input = document.createElement("input");
+  input.id = "mv-upload-file";
+  input.type = "file";
+  input.accept = ".pdf,.ppt,.pptx,.doc,.docx,.png,.jpg,.jpeg,.webp,.html,.zip";
+  label.append(input);
+
+  const upload = document.createElement("button");
+  upload.type = "button";
+  upload.textContent = "Файлды жүктеу";
+
+  const note = document.createElement("p");
+  note.textContent =
+    "Алдымен файлды жүктеңіз, содан кейін " +
+    "«Жоба ретінде сақтау» басыңыз. Ең көбі — 20 МБ.";
+
+  path.closest("label").before(label, upload, note);
+  path.readOnly = true;
+  path.placeholder = "Жүктегенде автоматты толтырылады";
+
+  let version = 0;
+  let uploading = false;
+
+  input.onchange = () => {
+    path.value = "";
+    status.textContent = "";
+  };
+
+  upload.onclick = async () => {
+    if (uploading) return;
+    const file = input.files[0];
+
+    if (!file) {
+      status.textContent = "Алдымен файл таңдаңыз.";
+      return;
+    }
+    if (!file.size || file.size > 20 * 1024 * 1024) {
+      status.textContent =
+        "Файл бос болмауы және 20 МБ-тан аспауы керек.";
+      return;
+    }
+
+    const extension = file.name.split(".").pop().toLowerCase();
+    const allowed = [
+      "pdf", "ppt", "pptx", "doc", "docx",
+      "png", "jpg", "jpeg", "webp", "html", "zip"
+    ];
+    if (!allowed.includes(extension)) {
+      status.textContent = "Бұл файл түрі қолдау таппайды.";
+      return;
+    }
+
+    const current = version;
+    uploading = true;
+    input.disabled = true;
+    upload.disabled = true;
+    save.disabled = true;
+    path.value = "";
+    status.textContent = "Файл жүктелуде…";
+
+    try {
+      const { data: admin, error: adminError } =
+        await client.rpc("mathverse_is_admin");
+      if (adminError) throw adminError;
+      if (current !== version) return;
+      if (admin !== true) throw new Error("Әкімші рұқсаты жоқ.");
+
+      const filePath =
+        "uploads/" + crypto.randomUUID() + "." + extension;
+
+      const { error } = await client.storage
+        .from("term2-materials")
+        .upload(filePath, file, {
+          upsert: false,
+          cacheControl: "0"
+        });
+
+      if (current !== version) return;
+      if (error) throw error;
+
+      path.value = filePath;
+      input.value = "";
+      status.textContent =
+        "Файл жүктелді. Атауы мен тақырыбын толтырып, " +
+        "«Жоба ретінде сақтау» басыңыз.";
+    } catch (error) {
+      if (current === version) {
+        status.textContent = "Жүктелмеді: " + error.message;
+      }
+    } finally {
+      uploading = false;
+      input.disabled = false;
+      upload.disabled = false;
+      save.disabled = false;
+    }
+  };
+
+  form.addEventListener("submit", event => {
+    if (uploading || !path.value) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      status.textContent = "Алдымен файлды жүктеңіз.";
+    }
+  }, true);
+
+  client.auth.onAuthStateChange(event => {
+    if (event === "SIGNED_OUT" || event === "SIGNED_IN") {
+      version++;
+      input.value = "";
+      path.value = "";
+    }
+  });
+})();
+                                      </script>
  
 </body>
 </html>
