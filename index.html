@@ -1547,6 +1547,176 @@ navigate();
   display: inline-block;
 }
   </style>
+  <script>
+(() => {
+  const client = window.mvClient;
+  const panel = document.querySelector("#materials .panel");
+  if (!client || !panel) return;
+
+  const selects = panel.querySelectorAll("select");
+  const term = selects[0];
+  const subject = selects[1];
+  const topic = selects[2];
+  if (!term || !subject || !topic) return;
+
+  term.value = "II тоқсан";
+  term.dispatchEvent(new Event("change"));
+
+  const box = document.createElement("div");
+  box.id = "mv-material-list";
+  panel.append(box);
+
+  const oldEmpty = panel.querySelector(".empty");
+  if (oldEmpty) oldEmpty.hidden = true;
+
+  const categories = {
+    "Жұмыс парақтары": "worksheet",
+    "Презентациялар": "presentation",
+    "Интерактивті ойындар": "game",
+    "БЖБ, ТЖБ": "assessment"
+  };
+
+  let offset = 0;
+  let sequence = 0;
+
+  function message(text) {
+    const p = document.createElement("p");
+    p.textContent = text;
+    box.replaceChildren(p);
+  }
+
+  async function load() {
+    const request = ++sequence;
+    message("Материалдар тексерілуде…");
+
+    try {
+      const { data: sessionData, error: sessionError } =
+        await client.auth.getSession();
+      if (request !== sequence) return;
+      if (sessionError) throw sessionError;
+
+      if (!sessionData.session) {
+        message("Материалдарды көру үшін аккаунтқа кіріңіз.");
+        return;
+      }
+
+      if (term.selectedIndex !== 1) {
+        message("Қазір II тоқсан материалдары дайындалуда.");
+        return;
+      }
+
+      const grade = Number(
+        document.querySelector(".grade.selected")?.dataset.grade
+      );
+      const type =
+        document.querySelector(".card.selected")?.dataset.type;
+      const subjectName =
+        subject.value === "Алгебра және анализ бастамалары"
+          ? "Алгебра"
+          : subject.value;
+
+      const { data, error } = await client
+        .from("mathverse_materials")
+        .select("id,title,topic,subject,grade,published")
+        .eq("grade", grade)
+        .eq("term", 2)
+        .eq("subject", subjectName)
+        .eq("category", categories[type])
+        .order("created_at", { ascending: false })
+        .order("id")
+        .range(offset, offset + 50);
+
+      if (request !== sequence) return;
+      if (error) throw error;
+
+      box.replaceChildren();
+
+      if (!data.length) {
+        message(
+          "Көрсетуге қолжетімді материал жоқ. " +
+          "Материалдар қосылғанда және рұқсат мерзімі " +
+          "басталғанда осы жерде көрінеді."
+        );
+      }
+
+      data.slice(0, 50).forEach(item => {
+        const card = document.createElement("article");
+        card.style.cssText =
+          "padding:18px;margin:12px 0;border:1px solid #e5dcfa;" +
+          "border-radius:16px;background:#faf8ff";
+
+        const title = document.createElement("h3");
+        title.textContent = item.title;
+        title.style.margin = "0 0 8px";
+
+        const details = document.createElement("p");
+        details.textContent =
+          item.grade + "-сынып · " + item.subject +
+          " · " + item.topic;
+
+        card.append(title, details);
+
+        if (!item.published) {
+          const draft = document.createElement("small");
+          draft.textContent = "Жоба — мұғалімдерге жарияланбаған";
+          card.append(draft);
+        }
+
+        box.append(card);
+      });
+
+      const navigation = document.createElement("div");
+      navigation.style.cssText =
+        "display:flex;gap:12px;margin-top:16px";
+
+      function pageButton(text, nextOffset) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = text;
+        button.style.cssText =
+          "padding:10px 16px;border:1px solid #d9cdf8;" +
+          "border-radius:12px;background:#f3edff;color:#7135ef";
+        button.onclick = () => {
+          offset = nextOffset;
+          load();
+        };
+        navigation.append(button);
+      }
+
+      if (offset > 0) pageButton("Алдыңғы", offset - 50);
+      if (data.length > 50) pageButton("Келесі", offset + 50);
+      box.append(navigation);
+    } catch (error) {
+      if (request === sequence) {
+        message("Тізім жүктелмеді: " + error.message);
+      }
+    }
+  }
+
+  function refresh() {
+    offset = 0;
+    load();
+  }
+
+  panel.addEventListener("change", event => {
+    if (event.target === term || event.target === subject) {
+      refresh();
+    }
+  });
+
+  document.querySelectorAll(".grade, .card[data-type]")
+    .forEach(button => button.addEventListener("click", refresh));
+
+  client.auth.onAuthStateChange(() => {
+    sequence++;
+    box.replaceChildren();
+    setTimeout(refresh, 0);
+  });
+
+  window.addEventListener("focus", refresh);
+  refresh();
+})();
+                                </script>
  
 </body>
 </html>
