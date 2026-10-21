@@ -1632,6 +1632,7 @@ if (isAdmin === true) {
         .eq("grade", grade)
         .eq("term", 2)
         .eq("subject", subjectName)
+        .eq("category", categories[type])
         .match(topic.value && !topic.disabled
   ? { topic: topic.value }
   : {})
