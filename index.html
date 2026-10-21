@@ -465,7 +465,17 @@ navigate();
 (() => {
   const art = document.querySelector(".art");
   const picture = new Image();
-  picture.src = "./" + encodeURIComponent("ChatGPT Image 20 окт. 2026 г., 23_23_57
-  
+
+  picture.alt = "";
+  picture.onload = () => {
+    art.replaceChildren(picture);
+    art.classList.add("math-picture");
+  };
+
+  picture.src = "./" + encodeURIComponent(
+    "ChatGPT Image 20 окт. 2026 г., 23_23_57.png"
+  );
+})();
+</script>
 </body>
- </html>
+</html>
