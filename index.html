@@ -1019,6 +1019,17 @@ navigate();
       }
 
       button.textContent = "Жеке кабинет";
+      const { data: isAdmin, error: adminError } =
+  await client.rpc("mathverse_is_admin");
+
+if (current !== request) return;
+if (adminError) throw adminError;
+
+if (isAdmin === true) {
+  gate.hidden = true;
+  panel.classList.remove("mv-locked");
+  return;
+}
 
       const { data, error } = await client
         .from("teacher_access")
