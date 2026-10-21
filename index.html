@@ -509,5 +509,21 @@ navigate();
   );
 })();
 </script>
+  <script>
+(() => {
+  const icon = document.querySelector(
+    '.card[data-type="Презентациялар"] svg'
+  );
+  const picture = new Image();
+
+  picture.alt = "";
+  picture.className = "category-picture";
+  picture.onload = () => icon.replaceWith(picture);
+
+  picture.src = "./" + encodeURIComponent(
+    "Лавандовый экран с учебными диаграммами.png"
+  );
+})();
+  </script>
 </body>
 </html>
