@@ -1621,7 +1621,9 @@ navigate();
         .eq("grade", grade)
         .eq("term", 2)
         .eq("subject", subjectName)
-        .eq("category", categories[type])
+        .match(topic.value && !topic.disabled
+  ? { topic: topic.value }
+  : {})
         .order("created_at", { ascending: false })
         .order("id")
         .range(offset, offset + 50);
@@ -1776,7 +1778,11 @@ card.append(title, details, download, feedback);
   }
 
   panel.addEventListener("change", event => {
-    if (event.target === term || event.target === subject) {
+    if (
+  event.target === term ||
+  event.target === subject ||
+  event.target === topic
+) {
       refresh();
     }
   });
