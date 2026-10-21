@@ -941,5 +941,150 @@ navigate();
   });
 })();
   </script>
+  <style>
+#materials .panel.mv-locked > :not(#mv-material-gate) {
+  display: none !important;
+}
+#mv-material-gate {
+  text-align: center;
+  padding: 35px 16px;
+  color: #14133e;
+}
+#mv-material-gate p {
+  line-height: 1.7;
+  white-space: pre-line;
+}
+#mv-material-gate button {
+  background: #7135ef;
+  color: white;
+  border: 0;
+  border-radius: 14px;
+  padding: 13px 22px;
+  cursor: pointer;
+}
+</style>
+
+<script>
+(() => {
+  const panel = document.querySelector("#materials .panel");
+  if (!panel) return;
+
+  panel.classList.add("mv-locked");
+
+  const gate = document.createElement("div");
+  gate.id = "mv-material-gate";
+
+  const title = document.createElement("h3");
+  title.textContent = "Материалдарға қолжетімділік";
+
+  const text = document.createElement("p");
+  text.textContent = "Рұқсат тексерілуде…";
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = "Жеке кабинет";
+  button.onclick = () =>
+    document.getElementById("mv-account").click();
+
+  gate.append(title, text, button);
+  panel.append(gate);
+
+  const client = window.mvClient;
+  if (!client) {
+    text.textContent =
+      "Кіру қызметі жүктелмеді. Бетті жаңартыңыз.";
+    return;
+  }
+
+  let request = 0;
+
+  async function checkAccess() {
+    const current = ++request;
+    panel.classList.add("mv-locked");
+    gate.hidden = false;
+    text.textContent = "Рұқсат тексерілуде…";
+
+    try {
+      const { data: sessionData, error: sessionError } =
+        await client.auth.getSession();
+
+      if (current !== request) return;
+      if (sessionError) throw sessionError;
+
+      if (!sessionData.session) {
+        text.textContent =
+          "Материалдарды ашу үшін аккаунтыңызға кіріңіз немесе тіркеліңіз.";
+        button.textContent = "Кіру / Тіркелу";
+        return;
+      }
+
+      button.textContent = "Жеке кабинет";
+
+      const { data, error } = await client
+        .from("teacher_access")
+        .select("approved, opens_at, closes_at")
+        .eq("user_id", sessionData.session.user.id)
+        .maybeSingle();
+
+      if (current !== request) return;
+      if (error) throw error;
+
+      if (!data || !data.approved) {
+        text.textContent =
+          "Материалдар ақылы.\nТөлем тексеріліп, автор рұқсат бергеннен кейін ашылады.";
+        return;
+      }
+
+      const formatDate = value =>
+        new Intl.DateTimeFormat("kk-KZ", {
+          timeZone: "Asia/Almaty",
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false
+        }).format(new Date(value));
+
+      const now = Date.now();
+      const opens = Date.parse(data.opens_at);
+      const closes = Date.parse(data.closes_at);
+
+      if (!Number.isFinite(opens) || !Number.isFinite(closes)) {
+        throw new Error("Invalid dates");
+      }
+
+      if (now < opens) {
+        text.textContent =
+          "✓ Сізге рұқсат берілген.\nМатериалдардың ашылуы: " +
+          formatDate(data.opens_at) +
+          "\nҚазақстан уақыты.";
+        return;
+      }
+
+      if (now >= closes) {
+        text.textContent =
+          "II тоқсан материалдарына кіру мерзімі аяқталды.";
+        return;
+      }
+
+      gate.hidden = true;
+      panel.classList.remove("mv-locked");
+    } catch (error) {
+      if (current !== request) return;
+      text.textContent =
+        "Рұқсатты тексеру мүмкін болмады. Интернетті тексеріп, бетті жаңартыңыз.";
+    }
+  }
+
+  client.auth.onAuthStateChange(() => {
+    setTimeout(checkAccess, 0);
+  });
+
+  window.addEventListener("focus", checkAccess);
+  setInterval(checkAccess, 60000);
+  checkAccess();
+})();
+</script>
 </body>
 </html>
