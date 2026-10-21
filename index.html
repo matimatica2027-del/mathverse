@@ -525,5 +525,21 @@ navigate();
   );
 })();
   </script>
+  <script>
+(() => {
+  const icon = document.querySelector(
+    '.card[data-type="Интерактивті ойындар"] svg'
+  );
+  const picture = new Image();
+
+  picture.alt = "";
+  picture.className = "category-picture";
+  picture.onload = () => icon.replaceWith(picture);
+
+  picture.src = "./" + encodeURIComponent(
+    "Лавандовый сундук с золотой звездой.png"
+  );
+})();
+  </script>
 </body>
 </html>
