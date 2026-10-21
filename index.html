@@ -2439,7 +2439,27 @@ searchInput?.addEventListener("input", () => {
         subject.value === "Алгебра және анализ бастамалары"
           ? "Алгебра" : subject.value;
 
-      const topics = new Set();
+      const curriculumTopics =
+  grade === 5 && subjectName === "Математика"
+    ? (
+        categories[type] === "assessment"
+          ? [
+              "БЖБ №4",
+              "БЖБ №5",
+              "ТЖБ №2"
+            ]
+          : [
+              "Жай бөлшектерді ортақ бөлімге келтіру. Жай бөлшектерді және аралас сандарды салыстыру",
+              "Жай бөлшектерді қосу және азайту",
+              "Аралас сандарды қосу. Аралас сандарды азайту",
+              "Жай бөлшектерді және аралас сандарды көбейту",
+              "Өзара кері сандар",
+              "Жай бөлшектерді және аралас сандарды бөлу"
+            ]
+      )
+    : [];
+
+const topics = new Set(curriculumTopics);
       let offset = 0;
 
       while (true) {
@@ -2466,7 +2486,14 @@ searchInput?.addEventListener("input", () => {
       );
 
       [...topics]
-        .sort((a, b) => a.localeCompare(b, "kk"))
+        .sort((a, b) => {
+  const ai = curriculumTopics.indexOf(a);
+  const bi = curriculumTopics.indexOf(b);
+  if (ai >= 0 && bi >= 0) return ai - bi;
+  if (ai >= 0) return -1;
+  if (bi >= 0) return 1;
+  return a.localeCompare(b, "kk");
+})
         .forEach(name => {
           topic.add(new Option(name, name));
         });
