@@ -2464,14 +2464,54 @@ searchInput?.addEventListener("input", () => {
   return n + "-сабақ. " + title;
 });
 
-const curriculumTopics =
-  grade === 5 && subjectName === "Математика"
-    ? (
-        categories[type] === "assessment"
-          ? [lessons5[15], lessons5[33], lessons5[37]]
-          : lessons5
-      )
-    : [];
+const lessons6 = Array.from({ length: 40 }, (_, i) => {
+  const n = i + 1;
+  let title;
+
+  if (n <= 3) {
+    title = "Рационал сандарды көбейту";
+  } else if (n <= 6) {
+    title = "Рационал сандарды қосу мен көбейтудің ауыстырымдылық және терімділік қасиеттері";
+  } else if (n <= 9) {
+    title = "Рационал сандарды бөлу";
+  } else if (n <= 12) {
+    title = "Рационал санды шексіз периодты ондық бөлшек түрінде беру. Шексіз периодты ондық бөлшекті жай бөлшекке айналдыру";
+  } else if (n <= 16) {
+    title = "Рационал сандарға арифметикалық амалдар";
+  } else if (n <= 21) {
+    title = "Мәтінді есептерді шығару";
+  } else if (n <= 23) {
+    title = "Айнымалы. Айнымалысы бар өрнек";
+  } else if (n <= 27) {
+    title = "Жақшаларды ашу. Коэффициент. Ұқсас қосылғыштар. Ұқсас қосылғыштарды біріктіру";
+  } else if (n === 28) {
+    title = "Өрнектерді тепе-тең түрлендіру. Тепе-теңдік";
+  } else if (n <= 32) {
+    title = "Алгебралық өрнектерді түрлендіру";
+  } else {
+    title = "Мәтінді есептерді шығару";
+  }
+
+  if (n === 20) title += ". БЖБ №3";
+  if (n === 35) title += ". БЖБ №4";
+  if (n === 37) title = "Тоқсан бойынша жиынтық бағалау №2";
+
+  return n + "-сабақ. " + title;
+});
+
+let curriculumTopics = [];
+
+if (subjectName === "Математика") {
+  if (grade === 5) {
+    curriculumTopics = categories[type] === "assessment"
+      ? [lessons5[15], lessons5[33], lessons5[37]]
+      : lessons5;
+  } else if (grade === 6) {
+    curriculumTopics = categories[type] === "assessment"
+      ? [lessons6[19], lessons6[34], lessons6[36]]
+      : lessons6;
+  }
+}
 
 const topics = new Set(curriculumTopics);
       let offset = 0;
