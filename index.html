@@ -1475,6 +1475,41 @@ navigate();
   cabinet.append(link);
 })();
   </script>
+  <script>
+(() => {
+  const buy = document.getElementById("mv-buy-access");
+  if (!buy || document.getElementById("mv-payment-info")) return;
+
+  const info = document.createElement("div");
+  info.id = "mv-payment-info";
+  info.style.cssText = `
+    margin-top:20px;
+    padding:18px;
+    border:1px solid #e5dcfa;
+    border-radius:16px;
+    background:#f7f3ff;
+    line-height:1.6;
+  `;
+
+  info.innerHTML = `
+    <strong>II тоқсан материалдары — 3000 ₸</strong>
+    <p>Kaspi арқылы төлем:<br>
+      <strong>+7 778 391 47 46</strong>
+    </p>
+    <p>Төлемнен кейін чекті және тіркелген
+      поштаңызды WhatsApp арқылы жіберіңіз.
+      Төлем тексерілген соң қолжетімділік беріледі.
+    </p>
+    <small>
+      Материалдар 01.11.2026 күні ашылады.
+      Қолжетімділік 26.12.2026 күні жабылады.
+    </small>
+  `;
+
+  buy.before(info);
+  buy.textContent = "Төлем чегін WhatsApp арқылы жіберу";
+})();
+  </script>
  
 </body>
 </html>
