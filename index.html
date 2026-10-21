@@ -2063,6 +2063,193 @@ navigate();
   });
 })();
                                       </script>
+  <script>
+(() => {
+  const client = window.mvClient;
+  const dialog = document.getElementById("mv-material-admin");
+  if (!client || !dialog ||
+      document.getElementById("mv-admin-material-list")) return;
+
+  const section = document.createElement("section");
+  section.innerHTML = `
+    <hr style="margin:24px 0;border:0;border-top:1px solid #e5dcfa">
+    <h3>Сақталған материалдар</h3>
+    <button type="button" data-refresh>Тізімді жаңарту</button>
+    <p data-message role="status"></p>
+    <div id="mv-admin-material-list"></div>
+    <div data-pages></div>
+  `;
+  dialog.append(section);
+
+  const list = section.querySelector("#mv-admin-material-list");
+  const message = section.querySelector("[data-message]");
+  const pages = section.querySelector("[data-pages]");
+  const refresh = section.querySelector("[data-refresh]");
+  let offset = 0;
+  let version = 0;
+  let busy = false;
+
+  async function requireAdmin() {
+    const { data, error } =
+      await client.rpc("mathverse_is_admin");
+    if (error) throw error;
+    if (data !== true) throw new Error("Әкімші рұқсаты жоқ.");
+  }
+
+  async function load() {
+    if (busy) return;
+    const current = ++version;
+    list.replaceChildren();
+    pages.replaceChildren();
+    message.textContent = "Тізім жүктелуде…";
+
+    try {
+      await requireAdmin();
+      if (current !== version) return;
+
+      const { data, error } = await client
+        .from("mathverse_materials")
+        .select("id,title,topic,grade,subject,category,published")
+        .order("created_at", { ascending: false })
+        .order("id")
+        .range(offset, offset + 20);
+
+      if (current !== version) return;
+      if (error) throw error;
+
+      message.textContent = data.length
+        ? "" : "Материалдар әзірге жоқ.";
+
+      data.slice(0, 20).forEach(item => {
+        const card = document.createElement("article");
+        card.style.cssText =
+          "padding:16px;margin:14px 0;background:#faf8ff;" +
+          "border:1px solid #e5dcfa;border-radius:14px;" +
+          "overflow-wrap:anywhere";
+
+        const title = document.createElement("strong");
+        title.textContent = item.title;
+
+        const details = document.createElement("p");
+        details.textContent =
+          item.grade + "-сынып · " +
+          item.subject + " · " + item.topic;
+
+        const state = document.createElement("p");
+        state.textContent = item.published
+          ? "Жарияланған · мұғалімдердің рұқсат мерзімі ескеріледі"
+          : "Жоба · мұғалімдерге жарияланбаған";
+
+        const edit = document.createElement("button");
+        edit.type = "button";
+        edit.textContent = "Өңдеу";
+        edit.onclick = () => {
+          const title = prompt("Материал атауы:", item.title);
+          if (title === null) return;
+          const topic = prompt("Тақырып:", item.topic);
+          if (topic === null) return;
+          if (!title.trim() || !topic.trim()) {
+            message.textContent = "Атау мен тақырып бос болмауы керек.";
+            return;
+          }
+          change(item, {
+            title: title.trim(),
+            topic: topic.trim()
+          });
+        };
+
+        const publish = document.createElement("button");
+        publish.type = "button";
+        publish.style.marginLeft = "8px";
+        publish.textContent = item.published
+          ? "Жариялаудан алу" : "Жариялау";
+        publish.onclick = () => {
+          const action = item.published
+            ? "жариялаудан аласыз ба?" : "жариялайсыз ба?";
+          if (confirm("«" + item.title + "» материалын " + action)) {
+            change(item, { published: !item.published });
+          }
+        };
+
+        card.append(title, details, state, edit, publish);
+        list.append(card);
+      });
+
+      function page(text, next) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = text;
+        button.style.marginRight = "10px";
+        button.onclick = () => {
+          offset = next;
+          load();
+        };
+        pages.append(button);
+      }
+      if (offset > 0) page("Алдыңғы", offset - 20);
+      if (data.length > 20) page("Келесі", offset + 20);
+    } catch (error) {
+      if (current === version) {
+        message.textContent = "Тізім ашылмады: " + error.message;
+      }
+    }
+  }
+
+  async function change(item, values) {
+    if (busy) return;
+    busy = true;
+    const current = ++version;
+    section.querySelectorAll("button")
+      .forEach(button => button.disabled = true);
+    message.textContent = "Сақталуда…";
+
+    try {
+      await requireAdmin();
+      if (current !== version) return;
+
+      const { data, error } = await client
+        .from("mathverse_materials")
+        .update(values)
+        .eq("id", item.id)
+        .select("id");
+
+      if (current !== version) return;
+      if (error) throw error;
+      if (!data?.length) throw new Error("Материал өзгертілмеді.");
+
+      busy = false;
+      await load();
+    } catch (error) {
+      if (current === version) {
+        message.textContent = "Сақталмады: " + error.message;
+      }
+    } finally {
+      busy = false;
+      section.querySelectorAll("button")
+        .forEach(button => button.disabled = false);
+    }
+  }
+
+  refresh.onclick = () => {
+    offset = 0;
+    load();
+  };
+
+  dialog.addEventListener("toggle", () => {
+    if (dialog.open) {
+      offset = 0;
+      load();
+    }
+  });
+
+  client.auth.onAuthStateChange(() => {
+    version++;
+    list.replaceChildren();
+    pages.replaceChildren();
+    message.textContent = "";
+  });
+})();
+  </script>
  
 </body>
 </html>
