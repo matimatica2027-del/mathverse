@@ -607,5 +607,82 @@ navigate();
   panel.insertBefore(label, empty);
 })();
 </script>
+  <style>
+.author-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 36px;
+  align-items: center;
+  padding: 16px;
+}
+.author-photo {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 22px;
+  box-shadow: 0 12px 30px #7135ef20;
+}
+.author-info h2 {
+  font-size: clamp(26px, 4vw, 38px);
+  margin: 12px 0;
+}
+.author-info p {
+  margin: 12px 0;
+}
+.author-role {
+  color: #7135ef !important;
+  font-weight: bold;
+}
+@media (max-width: 760px) {
+  .author-layout {
+    grid-template-columns: 1fr;
+    gap: 22px;
+    padding: 0;
+  }
+  .author-photo {
+    max-width: 260px;
+    margin: auto;
+  }
+}
+</style>
+
+<script>
+(() => {
+  const author = document.getElementById("author");
+
+  author.innerHTML = `
+    <div class="author-layout">
+      <img class="author-photo"
+           alt="Қонысғали Нұрасыл"
+           id="author-portrait">
+
+      <div class="author-info">
+        <span class="tag">MATHVERSE авторы</span>
+        <h2>Қонысғали Нұрасыл</h2>
+        <p class="author-role">Математика пәнінің мұғалімі</p>
+        <p>
+          MATHVERSE платформасын мұғалімдерге қажетті
+          материалдарды бір жерге жинақтап, сабаққа
+          дайындалуды жеңілдету мақсатында жасадым.
+        </p>
+        <p>
+          Мұнда 5–11-сыныптарға арналған жұмыс парақтары,
+          презентациялар, интерактивті ойындар және
+          БЖБ, ТЖБ материалдары орналастырылады.
+        </p>
+        <a class="primary" href="#materials">
+          Материалдарды қарау →
+        </a>
+      </div>
+    </div>
+  `;
+
+  document.getElementById("author-portrait").src =
+    "./" + encodeURIComponent(
+      "Портрет мужчины с чисто выбритым лицом.png"
+    );
+})();
+</script>
 </body>
 </html>
