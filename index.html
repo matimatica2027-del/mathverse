@@ -1431,6 +1431,50 @@ navigate();
   };
 })();
   </script>
+  <script>
+(() => {
+  const cabinet = document.getElementById("mv-login");
+  if (!cabinet || document.getElementById("mv-buy-access")) return;
+
+  const link = document.createElement("a");
+  link.id = "mv-buy-access";
+  link.textContent = "Қолжетімділікті сатып алу";
+  link.target = "_blank";
+  link.rel = "noopener noreferrer";
+  link.style.cssText = `
+    display:block;
+    margin-top:16px;
+    padding:14px 18px;
+    border-radius:14px;
+    background:#7135ef;
+    color:white;
+    text-align:center;
+    font-weight:bold;
+    text-decoration:none;
+  `;
+
+  function updateLink() {
+    const email =
+      document.getElementById("mv-email")?.value.trim() || "";
+
+    const message =
+      "Сәлеметсіз бе! MATHVERSE платформасының " +
+      "II тоқсан материалдарына қолжетімділік сатып алғым келеді." +
+      (email ? "\nТіркелген поштам: " + email : "");
+
+    link.href =
+      "https://wa.me/77786418203?text=" +
+      encodeURIComponent(message);
+  }
+
+  updateLink();
+  document.getElementById("mv-email")
+    ?.addEventListener("input", updateLink);
+
+  link.addEventListener("click", updateLink);
+  cabinet.append(link);
+})();
+  </script>
  
 </body>
 </html>
