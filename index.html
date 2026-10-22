@@ -2878,6 +2878,71 @@ if (grade === 10 && track === "jmb") {
       : geometry11JMB;
   }
 }
+      if (grade === 11 && track === "qgb") {
+  const algebra11QGB = Array.from({ length: 23 }, (_, i) => {
+    const n = i + 1;
+    let title;
+
+    if (n <= 3) {
+      title = "n-ші дәрежелі түбір және оның қасиеттері";
+    } else if (n === 4) {
+      title = "Рационал көрсеткішті дәреже";
+    } else if (n <= 6) {
+      title =
+        "Рационал көрсеткішті дәрежесі бар өрнектерді түрлендіру";
+    } else if (n <= 9) {
+      title = "Иррационал өрнектерді түрлендіру";
+    } else if (n <= 12) {
+      title = "Дәрежелік функция, оның қасиеттері мен графигі";
+    } else if (n <= 15) {
+      title =
+        "Нақты көрсеткішті дәрежелік функцияның туындысы мен интегралы";
+    } else {
+      title =
+        "Иррационал теңдеулер. Иррационал теңдеулерді шешу әдістері";
+    }
+
+    if (n === 14) title += ". БЖБ №2";
+    if (n === 20) title += ". БЖБ №3";
+    if (n === 22) {
+      title = "Тоқсан бойынша жиынтық бағалау №2";
+    }
+
+    return `${n}-сабақ. ${title}`;
+  });
+
+  const geometry11QGB = Array.from({ length: 8 }, (_, i) => {
+    const n = i + 1;
+    let title;
+
+    if (n === 1) {
+      title =
+        "Пирамиданың жазбасы, бүйір және толық бетінің аудандары";
+    } else if (n <= 4) {
+      title = "Қиық пирамида бетінің ауданы";
+    } else {
+      title = "Дұрыс көпжақтар";
+    }
+
+    if (n === 7) title += ". БЖБ №2";
+
+    return `${n}-сабақ. ${title}`;
+  });
+
+  if (subjectName === "Алгебра") {
+    curriculumTopics = isAssessment
+      ? [
+          algebra11QGB[13],
+          algebra11QGB[19],
+          algebra11QGB[21]
+        ]
+      : algebra11QGB;
+  } else if (subjectName === "Геометрия") {
+    curriculumTopics = isAssessment
+      ? [geometry11QGB[6]]
+      : geometry11QGB;
+  }
+      }
 const topics = new Set(curriculumTopics);
       let offset = 0;
 
