@@ -1719,11 +1719,86 @@ const { data, error } = await client
 
         const download = document.createElement("button");
 download.type = "button";
-download.textContent = "Жүктеп алу";
+download.textContent = /\.html?$/i.test(item.file_path)
+  ? "🎮 Ойнау"
+  : "Жүктеп алу";
 download.style.cssText =
   "margin-top:12px;padding:12px 18px;border:0;" +
   "border-radius:12px;background:#7135ef;color:white";
+if (/\.html?$/i.test(item.file_path)) {
+  const html = await blob.text();
 
+  const dialog = document.createElement("dialog");
+  dialog.style.cssText =
+    "width:100vw;max-width:none;height:100dvh;" +
+    "max-height:none;margin:0;padding:0;border:0;" +
+    "background:#100d24;color:white;";
+
+  const toolbar = document.createElement("div");
+  toolbar.style.cssText =
+    "display:flex;align-items:center;justify-content:space-between;" +
+    "gap:12px;padding:10px 14px;background:#211735;";
+
+  const heading = document.createElement("strong");
+  heading.textContent = item.title;
+
+  const close = document.createElement("button");
+  close.textContent = "✕ Жабу";
+  close.style.cssText =
+    "padding:10px 15px;border:0;border-radius:10px;" +
+    "background:#eee5ff;color:#5421b3;cursor:pointer;";
+
+  const frame = document.createElement("iframe");
+  frame.title = item.title;
+  frame.setAttribute("sandbox", "allow-scripts");
+  frame.style.cssText =
+    "display:block;width:100%;height:calc(100% - 60px);" +
+    "border:0;background:#100d24;";
+
+  toolbar.append(heading, close);
+  dialog.append(toolbar, frame);
+  document.body.append(dialog);
+
+  let disposed = false;
+  let authSubscription;
+
+  function cleanup() {
+    if (disposed) return;
+    disposed = true;
+    frame.srcdoc = "";
+    authSubscription?.unsubscribe();
+    dialog.remove();
+  }
+
+  close.onclick = () => dialog.close();
+  dialog.addEventListener("close", cleanup, { once: true });
+
+  authSubscription = client.auth.onAuthStateChange(
+    (event, currentSession) => {
+      if (
+        event === "SIGNED_OUT" ||
+        (
+          currentSession &&
+          currentSession.user.id !== session.user.id
+        )
+      ) {
+        if (dialog.open) dialog.close();
+        else cleanup();
+      }
+    }
+  ).data.subscription;
+
+  try {
+    dialog.showModal();
+    frame.srcdoc = html;
+  } catch (error) {
+    cleanup();
+    throw error;
+  }
+
+  feedback.textContent = "Ойын ашылды.";
+  return;
+    }
 const feedback = document.createElement("p");
 feedback.setAttribute("role", "status");
 
