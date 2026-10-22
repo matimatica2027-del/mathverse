@@ -1207,6 +1207,21 @@ if (isAdmin === true) {
 
         const email = document.createElement("strong");
         email.textContent = teacher.email;
+        const registered = document.createElement("p");
+const date = new Date(teacher.registered_at);
+
+registered.textContent = "Тіркелген: " +
+  (Number.isNaN(date.getTime())
+    ? "Күні белгісіз"
+    : new Intl.DateTimeFormat("kk-KZ", {
+        timeZone: "Asia/Almaty",
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hourCycle: "h23"
+      }).format(date));
 
         const state = document.createElement("p");
         state.textContent = !teacher.confirmed
@@ -1265,7 +1280,7 @@ if (isAdmin === true) {
           if (changeVersion === epoch) await load();
         };
 
-        row.append(email, state, action);
+        row.append(email, registered, state, action);
         list.append(row);
       }
     } catch (error) {
