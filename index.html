@@ -3081,6 +3081,50 @@ if ("serviceWorker" in navigator) {
   help.append(section);
 })();
   </script>
+  <script>
+(() => {
+  const panel = document.querySelector("#materials .panel");
+  if (!panel || document.getElementById("mv-track")) return;
+
+  const subject = panel.querySelectorAll("select")[1];
+  const topic = panel.querySelectorAll("select")[2];
+  if (!subject || !topic) return;
+
+  const label = document.createElement("label");
+  label.style.cssText =
+    "display:block;margin:12px 0;color:#656174;font-size:13px";
+  label.textContent = "Бағыт";
+
+  const select = document.createElement("select");
+  select.id = "mv-track";
+  select.style.cssText =
+    "display:block;width:100%;margin-top:6px;padding:10px;" +
+    "border:1px solid #e5dff2;border-radius:10px;" +
+    "background:#faf8ff;color:#242039";
+  select.add(new Option("Жаратылыстану-математикалық (ЖМБ)", "jmb"));
+  select.add(new Option("Қоғамдық-гуманитарлық (ҚГБ)", "qgb"));
+  label.append(select);
+
+  topic.parentElement.insertAdjacentElement("afterend", label);
+
+  function sync() {
+    const grade = Number(
+      document.querySelector(".grade.selected")?.dataset.grade
+    );
+    label.hidden = grade !== 10 && grade !== 11;
+  }
+
+  document.querySelectorAll(".grade").forEach(button => {
+    button.addEventListener("click", sync);
+  });
+
+  select.addEventListener("change", () => {
+    subject.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+
+  sync();
+})();
+  </script>
  
 </body>
 </html>
