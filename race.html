@@ -395,5 +395,284 @@ function celebrate(){
  animation=requestAnimationFrame(draw);
 }
 </script>
+ <style>
+/* Жарыс көрінісі */
+#track {
+  display: none;
+}
+
+#arena {
+  min-height: 0;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  overflow: visible;
+  margin-bottom: 125px;
+  isolation: isolate;
+}
+
+#background {
+  background: url("./race-road.png") center / 100% 100% no-repeat;
+  border-radius: 22px;
+}
+
+#arena::after {
+  border-radius: 22px;
+  background: linear-gradient(#080c2830, transparent 45%);
+}
+
+#arena.boost #background,
+#arena.brake #background {
+  transform: none;
+  filter: none;
+}
+
+#speedLines {
+  display: none;
+}
+
+.question {
+  margin: 12px auto;
+  padding: 10px 16px;
+  width: fit-content;
+  min-width: 35%;
+  max-width: 75%;
+}
+
+#question {
+  font-size: clamp(22px, 3.5vw, 40px);
+  line-height: 1.7;
+}
+
+#answers {
+  bottom: -112px;
+  left: 0;
+  right: 0;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.answer {
+  min-height: 95px;
+  font-size: clamp(19px, 3vw, 29px);
+  background: linear-gradient(140deg, #32234e, #11192f);
+}
+
+#moving-car {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  transform: translate(-50%, -100%);
+  transform-origin: center bottom;
+  filter: drop-shadow(0 8px 5px #0008);
+  will-change: left, top, width;
+}
+
+#moving-car img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+#moving-car.accelerating img {
+  filter: drop-shadow(-12px 3px 8px #bb66ff);
+}
+
+#moving-car.braking img {
+  filter: drop-shadow(-7px 0 7px #ff354b);
+}
+
+#drive-message {
+  position: absolute;
+  right: 15px;
+  bottom: 12px;
+  z-index: 3;
+  background: #11152ac9;
+  border: 1px solid #e0baff50;
+  border-radius: 12px;
+  padding: 8px 12px;
+  color: #f2ddff;
+  font-size: 13px;
+}
+
+@media (max-width: 650px) {
+  #arena {
+    min-height: 0;
+    aspect-ratio: 16 / 9;
+    margin-bottom: 185px;
+  }
+
+  .question {
+    margin: 6px auto;
+    padding: 5px 12px;
+    max-width: 90%;
+  }
+
+  #label {
+    font-size: 11px;
+  }
+
+  #question {
+    font-size: 23px;
+  }
+
+  #answers {
+    bottom: -175px;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .answer {
+    min-height: 78px;
+    font-size: 23px;
+  }
+
+  #drive-message {
+    font-size: 10px;
+    padding: 5px 8px;
+    right: 7px;
+    bottom: 6px;
+  }
+}
+</style>
+
+<script>
+(() => {
+  const arena = document.getElementById("arena");
+  const marker = document.getElementById("car");
+  const next = document.getElementById("next");
+
+  if (!arena || !marker || !next) return;
+
+  const vehicle = document.createElement("div");
+  vehicle.id = "moving-car";
+
+  const picture = document.createElement("img");
+  picture.src = "./race-car.png";
+  picture.alt = "Күлгін жарыс көлігі";
+  picture.draggable = false;
+
+  vehicle.append(picture);
+  arena.append(vehicle);
+
+  const message = document.createElement("div");
+  message.id = "drive-message";
+  message.textContent = "Жарысқа дайын";
+  arena.append(message);
+
+  picture.addEventListener("error", () => {
+    message.textContent = "race-car.png файлы ашылмады";
+  });
+
+  /*
+    x, y — көліктің жолдағы орны, пайызбен.
+    w — алыстаған сайын кішірейетін ені.
+  */
+  const route = [
+    { p: 0,    x: 24, y: 85, w: 39 },
+    { p: 0.22, x: 46, y: 76, w: 30 },
+    { p: 0.45, x: 68, y: 65, w: 21 },
+    { p: 0.65, x: 84, y: 54, w: 13 },
+    { p: 0.82, x: 90, y: 45, w: 8 },
+    { p: 1,    x: 87, y: 38, w: 4.5 }
+  ];
+
+  function position(progress) {
+    let i = 1;
+    while (i < route.length - 1 && progress > route[i].p) i++;
+
+    const a = route[i - 1];
+    const b = route[i];
+    const t = Math.max(0, Math.min(1,
+      (progress - a.p) / (b.p - a.p)
+    ));
+
+    vehicle.style.left = (a.x + (b.x - a.x) * t) + "%";
+    vehicle.style.top = (a.y + (b.y - a.y) * t) + "%";
+    vehicle.style.width = (a.w + (b.w - a.w) * t) + "%";
+  }
+
+  let current = 0;
+  let frame = 0;
+  let generation = 0;
+
+  position(0);
+
+  function drive(destination) {
+    const start = current;
+    const ticket = ++generation;
+
+    cancelAnimationFrame(frame);
+    vehicle.classList.remove("braking");
+    vehicle.classList.add("accelerating");
+
+    message.textContent = "Үдеу! Мәреге қарай!";
+    next.disabled = true;
+
+    const duration =
+      matchMedia("(prefers-reduced-motion: reduce)").matches ? 1 : 1600;
+    const started = performance.now();
+
+    function animate(now) {
+      if (ticket !== generation) return;
+
+      const t = Math.min(1, (now - started) / duration);
+      const ease = t * t * (3 - 2 * t);
+
+      current = start + (destination - start) * ease;
+      position(current);
+
+      if (t < 1) {
+        frame = requestAnimationFrame(animate);
+      } else {
+        vehicle.classList.remove("accelerating");
+        next.disabled = false;
+        message.textContent = destination >= 0.999
+          ? "🏁 Мәреге жеттіңіз!"
+          : "Келесі есепті шешіңіз";
+      }
+    }
+
+    frame = requestAnimationFrame(animate);
+  }
+
+  /* Негізгі ойынның ілгерілеуін нақты көлікке байланыстыру */
+  new MutationObserver(() => {
+    const value = parseFloat(marker.style.left);
+
+    if (!Number.isFinite(value)) return;
+
+    const destination = Math.max(0, Math.min(1, (value - 2) / 82));
+
+    if (destination === 0) {
+      generation++;
+      cancelAnimationFrame(frame);
+      current = 0;
+      position(0);
+      vehicle.classList.remove("accelerating", "braking");
+      next.disabled = false;
+      message.textContent = "Жарысқа дайын";
+    } else if (Math.abs(destination - current) > 0.001) {
+      drive(destination);
+    }
+  }).observe(marker, {
+    attributes: true,
+    attributeFilter: ["style"]
+  });
+
+  new MutationObserver(() => {
+    const braking = arena.classList.contains("brake");
+    vehicle.classList.toggle("braking", braking);
+
+    if (braking) {
+      message.textContent = "Тежелді! Қайта есептеңіз";
+    } else if (!vehicle.classList.contains("accelerating") && current < 1) {
+      message.textContent = "Дұрыс жауапты таңдаңыз";
+    }
+  }).observe(arena, {
+    attributes: true,
+    attributeFilter: ["class"]
+  });
+})();
+                             </script>
 </body>
   </html>
