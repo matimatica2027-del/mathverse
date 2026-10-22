@@ -2618,6 +2618,56 @@ if (grade === 8 && subjectName === "Алгебра") {
     ? [lessons8Geometry[12], lessons8Geometry[14]]
     : lessons8Geometry;
     }
+      const lessons9Algebra = Array.from({ length: 24 }, (_, i) => {
+  const n = i + 1;
+  let title;
+
+  if (n <= 4) {
+    title = "Сандар тізбегі, оның берілу тәсілдері және қасиеттері";
+  } else if (n <= 15) {
+    title = "Арифметикалық және геометриялық прогрессиялар";
+  } else if (n <= 18) {
+    title = "Шексіз кемімелі геометриялық прогрессия";
+  } else {
+    title = "Мәтінді есептерді шығару";
+  }
+
+  if (n === 15) title += ". БЖБ №3";
+  if (n === 20) title += ". БЖБ №4";
+  if (n === 22) title = "Тоқсан бойынша жиынтық бағалау №2";
+
+  return n + "-сабақ. " + title;
+});
+
+const lessons9Geometry = Array.from({ length: 16 }, (_, i) => {
+  const n = i + 1;
+  let title;
+
+  if (n <= 3) {
+    title = "Қозғалыс және оның қасиеттері";
+  } else if (n <= 5) {
+    title = "Гомотетия және оның қасиеттері";
+  } else if (n === 6 || n === 16) {
+    title = "Ұқсас фигуралар және олардың қасиеттері";
+  } else {
+    title = "Үшбұрыштар ұқсастығының белгілері";
+  }
+
+  if (n === 13) title += ". БЖБ №2";
+  if (n === 15) title = "Тоқсан бойынша жиынтық бағалау №2";
+
+  return n + "-сабақ. " + title;
+});
+
+if (grade === 9 && subjectName === "Алгебра") {
+  curriculumTopics = isAssessment
+    ? [lessons9Algebra[14], lessons9Algebra[19], lessons9Algebra[21]]
+    : lessons9Algebra;
+} else if (grade === 9 && subjectName === "Геометрия") {
+  curriculumTopics = isAssessment
+    ? [lessons9Geometry[12], lessons9Geometry[14]]
+    : lessons9Geometry;
+}
 const topics = new Set(curriculumTopics);
       let offset = 0;
 
