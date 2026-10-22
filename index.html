@@ -2802,6 +2802,82 @@ if (grade === 10 && track === "jmb") {
       : geometry10QGB;
   }
       }
+      if (grade === 11 && track === "jmb") {
+  const algebra11JMB = Array.from({ length: 32 }, (_, i) => {
+    const n = i + 1;
+    let title;
+
+    if (n <= 3) {
+      title = "n-ші дәрежелі түбір және оның қасиеттері";
+    } else if (n === 4) {
+      title = "Рационал көрсеткішті дәреже";
+    } else if (n <= 7) {
+      title =
+        "Рационал көрсеткішті дәрежесі бар өрнектерді түрлендіру";
+    } else if (n <= 10) {
+      title = "Иррационал өрнектерді түрлендіру";
+    } else if (n <= 14) {
+      title = "Дәрежелік функция, оның қасиеттері мен графигі";
+    } else if (n <= 17) {
+      title =
+        "Нақты көрсеткішті дәрежелік функцияның туындысы мен интегралы";
+    } else if (n <= 23) {
+      title = "Иррационал теңдеулер мен олардың жүйелері";
+    } else {
+      title = "Иррационал теңсіздіктер";
+    }
+
+    if (n === 17) title += ". БЖБ №3";
+    if (n === 27) title += ". БЖБ №4";
+    if (n === 29) {
+      title = "Тоқсан бойынша жиынтық бағалау №2";
+    }
+
+    return `${n}-сабақ. ${title}`;
+  });
+
+  const geometry11JMB = Array.from({ length: 16 }, (_, i) => {
+    const n = i + 1;
+    let title;
+
+    if (n <= 2) {
+      title =
+        "Пирамиданың, қиық пирамиданың жазбасы, бүйір беті және толық бетінің аудандары";
+    } else if (n <= 4) {
+      title = "Көпжақтардың жазықтықпен қималары";
+    } else if (n <= 6) {
+      title = "Дұрыс көпжақтар";
+    } else if (n <= 8) {
+      title = "Кеңістіктегі түзу мен жазықтықтың өзара орналасуы";
+    } else if (n <= 10) {
+      title = "Кеңістіктегі нүктеден жазықтыққа дейінгі арақашықтық";
+    } else {
+      title =
+        "Кеңістіктегі түзулер арасындағы бұрышты, түзу мен жазықтық арасындағы бұрышты табу";
+    }
+
+    if (n === 13) title += ". БЖБ №2";
+    if (n === 15) {
+      title = "Тоқсан бойынша жиынтық бағалау №2";
+    }
+
+    return `${n}-сабақ. ${title}`;
+  });
+
+  if (subjectName === "Алгебра") {
+    curriculumTopics = isAssessment
+      ? [
+          algebra11JMB[16],
+          algebra11JMB[26],
+          algebra11JMB[28]
+        ]
+      : algebra11JMB;
+  } else if (subjectName === "Геометрия") {
+    curriculumTopics = isAssessment
+      ? [geometry11JMB[12], geometry11JMB[14]]
+      : geometry11JMB;
+  }
+}
 const topics = new Set(curriculumTopics);
       let offset = 0;
 
