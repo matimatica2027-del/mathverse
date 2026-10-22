@@ -1726,7 +1726,8 @@ download.style.cssText =
   "margin-top:12px;padding:12px 18px;border:0;" +
   "border-radius:12px;background:#7135ef;color:white";
 
-
+const feedback = document.createElement("p");
+feedback.setAttribute("role", "status");
 download.onclick = async () => {
   download.disabled = true;
   feedback.textContent = "Файл жүктелуде…";
@@ -1827,8 +1828,7 @@ download.onclick = async () => {
         event === "SIGNED_OUT" ||
         (
           currentSession &&
-          const feedback = document.createElement("p");
-feedback.setAttribute("role", "status");
+          
           currentSession.user.id !== session.user.id
         )
       ) {
