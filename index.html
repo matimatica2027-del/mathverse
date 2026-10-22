@@ -2745,6 +2745,63 @@ if (grade === 10 && track === "jmb") {
       : geometry10;
   }
   }
+      if (grade === 10 && track === "qgb") {
+  const algebra10QGB = Array.from({ length: 23 }, (_, i) => {
+    const n = i + 1;
+    let title;
+
+    if (n <= 3) {
+      title = "Қарапайым тригонометриялық теңдеулер";
+    } else if (n <= 9) {
+      title = "Тригонометриялық теңдеулерді шешу әдістері";
+    } else if (n <= 14) {
+      title = "Қарапайым тригонометриялық теңсіздіктерді шешу";
+    } else if (n <= 17) {
+      title = "Оқиға ықтималдығы және оның қасиеттері";
+    } else {
+      title = "Ықтималдықтарды қосу және көбейту ережелері";
+    }
+
+    if (n === 14) title += ". БЖБ №3";
+    if (n === 20) title += ". БЖБ №4";
+    if (n === 22) {
+      title = "Тоқсан бойынша жиынтық бағалау №2";
+    }
+
+    return `${n}-сабақ. ${title}`;
+  });
+
+  const geometry10QGB = Array.from({ length: 8 }, (_, i) => {
+    const n = i + 1;
+    let title;
+
+    if (n <= 2) {
+      title = "Кеңістіктегі түзулер арасындағы бұрыш";
+    } else if (n <= 4) {
+      title = "Перпендикуляр және көлбеу";
+    } else {
+      title = "Үш перпендикуляр туралы теорема";
+    }
+
+    if (n === 7) title += ". БЖБ №2";
+
+    return `${n}-сабақ. ${title}`;
+  });
+
+  if (subjectName === "Алгебра") {
+    curriculumTopics = isAssessment
+      ? [
+          algebra10QGB[13],
+          algebra10QGB[19],
+          algebra10QGB[21]
+        ]
+      : algebra10QGB;
+  } else if (subjectName === "Геометрия") {
+    curriculumTopics = isAssessment
+      ? [geometry10QGB[6]]
+      : geometry10QGB;
+  }
+      }
 const topics = new Set(curriculumTopics);
       let offset = 0;
 
