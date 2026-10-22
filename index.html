@@ -2668,6 +2668,83 @@ if (grade === 9 && subjectName === "Алгебра") {
     ? [lessons9Geometry[12], lessons9Geometry[14]]
     : lessons9Geometry;
 }
+      const track =
+  document.getElementById("mv-track")?.value || "jmb";
+
+if (grade === 10 && track === "jmb") {
+  const algebra10 = Array.from({ length: 32 }, (_, i) => {
+    const n = i + 1;
+    let title;
+
+    if (n <= 3) {
+      title = "Қарапайым тригонометриялық теңдеулер";
+    } else if (n <= 8) {
+      title =
+        "Тригонометриялық теңдеулер және олардың жүйелерін шешу әдістері";
+    } else if (n <= 15) {
+      title = "Тригонометриялық теңсіздіктерді шешу";
+    } else if (n === 16) {
+      title =
+        "Комбинаторика элементтері және оларды оқиғалардың ықтималдықтарын табуда қолданылуы";
+    } else if (n === 17) {
+      title = "Жуықтап есептеулер үшін Ньютон биномы";
+    } else if (n <= 19) {
+      title = "Оқиға ықтималдығы және оның қасиеттері";
+    } else if (n <= 21) {
+      title =
+        "Шартты ықтималдық. Ықтималдықтарды қосу және көбейту ережелері";
+    } else if (n <= 24) {
+      title = "Толық ықтималдық формуласы және Байес формуласы";
+    } else if (n <= 27) {
+      title = "Бернулли формуласы және оның салдарлары";
+    } else {
+      title =
+        "Нақты құбылыстар мен процестердің ықтималдық модельдері";
+    }
+
+    if (n === 8) title += ". БЖБ №4";
+    if (n === 15) title += ". БЖБ №5";
+    if (n === 28) title += ". БЖБ №6";
+    if (n === 30) {
+      title = "Тоқсан бойынша жиынтық бағалау №2";
+    }
+
+    return `${n}-сабақ. ${title}`;
+  });
+
+  const geometry10 = Array.from({ length: 16 }, (_, i) => {
+    const n = i + 1;
+    let title;
+
+    if (n <= 3) {
+      title =
+        "Түзу мен жазықтықтың перпендикулярлығы. Үш перпендикуляр туралы теорема";
+    } else if (n <= 7) {
+      title = "Кеңістіктегі арақашықтықтар";
+    } else if (n <= 10) {
+      title = "Кеңістіктегі бұрыштар";
+    } else {
+      title = "Жазықтықтардың перпендикулярлығы";
+    }
+
+    if (n === 13) title += ". БЖБ №2";
+    if (n === 15) {
+      title = "Тоқсан бойынша жиынтық бағалау №2";
+    }
+
+    return `${n}-сабақ. ${title}`;
+  });
+
+  if (subjectName === "Алгебра") {
+    curriculumTopics = isAssessment
+      ? [algebra10[7], algebra10[14], algebra10[27], algebra10[29]]
+      : algebra10;
+  } else if (subjectName === "Геометрия") {
+    curriculumTopics = isAssessment
+      ? [geometry10[12], geometry10[14]]
+      : geometry10;
+  }
+  }
 const topics = new Set(curriculumTopics);
       let offset = 0;
 
