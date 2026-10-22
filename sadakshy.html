@@ -487,5 +487,98 @@ function celebrate(){
  confettiFrame=requestAnimationFrame(frame);
 }
 </script>
+ <style>
+#scene {
+  height: auto;
+  aspect-ratio: 1664 / 941;
+  background: url("./sadak-bg.png") center / 100% 100% no-repeat;
+  isolation: isolate;
+}
+
+#scene::before,
+#scene::after,
+#scene .moon,
+#scene .tree {
+  display: none;
+}
+
+/* Жебенің бастапқы орнын есептеу үшін сақталады */
+#archer {
+  visibility: hidden;
+  left: 0;
+  top: 0;
+  bottom: auto;
+  width: 38%;
+  height: 32%;
+}
+
+#targets {
+  inset: 0;
+  width: 100%;
+  display: block;
+}
+
+#targets .target {
+  position: absolute;
+  width: 16%;
+  height: 29%;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: none;
+  color: #251830;
+  text-shadow: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#targets .target:nth-child(1) {
+  left: 59.8%;
+  top: 19.5%;
+}
+
+#targets .target:nth-child(2) {
+  left: 79.6%;
+  top: 19.5%;
+}
+
+#targets .target:nth-child(3) {
+  left: 59%;
+  top: 50.5%;
+}
+
+#targets .target:nth-child(4) {
+  left: 79.4%;
+  top: 50.5%;
+}
+
+#targets .target:hover {
+  background: #fff5c52b;
+  transform: none;
+  box-shadow: 0 0 18px #ffe3a0;
+}
+
+#targets .target:disabled {
+  opacity: 1;
+}
+
+#targets .target .math {
+  font-size: clamp(16px, 3vw, 32px);
+  font-weight: 900;
+}
+
+#targets .target.hit {
+  background: #ffe79a66;
+  box-shadow: 0 0 30px #ffda65;
+}
+
+#targets .target:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+ </style>
 </body>
   </html>
