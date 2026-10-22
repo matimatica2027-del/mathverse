@@ -1827,6 +1827,8 @@ download.onclick = async () => {
         event === "SIGNED_OUT" ||
         (
           currentSession &&
+          const feedback = document.createElement("p");
+feedback.setAttribute("role", "status");
           currentSession.user.id !== session.user.id
         )
       ) {
@@ -1847,8 +1849,6 @@ download.onclick = async () => {
   feedback.textContent = "Ойын ашылды.";
   return;
     }
-const feedback = document.createElement("p");
-feedback.setAttribute("role", "status");
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     const extension = item.file_path.split(".").pop();
