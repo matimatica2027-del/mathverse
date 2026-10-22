@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MATHVERSE — Қазына аралы</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#101c25;color:#fff;font-family:Arial,sans-serif}
+button,input{font:inherit}
+button{cursor:pointer}
+header,main,footer{max-width:1200px;margin:auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.brand{font-weight:900;letter-spacing:2px;color:#e3c2ff}
+button{padding:12px 17px;border:1px solid #ceb2ff60;border-radius:13px;
+background:#ffffff12;color:#fff}
+button:hover{background:#ffffff25}
+button:disabled{cursor:default;opacity:.6}
+.primary{background:linear-gradient(130deg,#a164ed,#7440ce);font-weight:bold}
+.panel{padding:22px;background:linear-gradient(130deg,#24303b,#242039);
+border:1px solid #c4a4f63b;border-radius:22px}
+h1{font-size:clamp(28px,5vw,46px);margin:12px 0}
+p{color:#d4d5dd;line-height:1.6}
+input{display:block;width:100%;margin:10px 0;padding:14px;
+border:1px solid #b89ce966;border-radius:12px;background:#101b29;color:white}
+label{font-size:14px}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+#notice{min-height:24px;color:#ffdb99}
+.preview{display:flex;justify-content:space-between;gap:18px;
+align-items:center;border-bottom:1px solid #ffffff20;padding:14px 0;font-size:20px}
+.frac{display:inline-flex;flex-direction:column;align-items:center;
+vertical-align:middle;line-height:1.1;margin:0 5px}
+.frac>span:first-child{border-bottom:2px solid currentColor;padding:0 4px 3px}
+.frac>span:last-child{padding:3px 4px 0}
+#game,#result{display:none}
+.hud{display:flex;justify-content:space-between;align-items:center;
+gap:10px;flex-wrap:wrap;margin-bottom:14px}
+#map{position:relative;aspect-ratio:1664/941;overflow:hidden;
+border-radius:18px;background:url("./island-bg.png") center/100% 100% no-repeat;
+isolation:isolate}
+#player{position:absolute;left:17%;top:79%;width:8.5%;z-index:8;
+transform:translate(-50%,-100%);pointer-events:none;
+filter:drop-shadow(0 4px 3px #0007)}
+#player img{width:100%;display:block}
+#player.walking img{animation:walk .27s infinite alternate}
+@keyframes walk{to{transform:translateY(-5px) rotate(2deg)}}
+.bridge-piece{position:absolute;z-index:4;width:14%;height:5%;
+transform:translate(-50%,-50%) rotate(13deg);
+background:repeating-linear-gradient(0deg,#74431e 0 4px,#bc8445 5px 10px);
+border:2px solid #d8a05c;box-shadow:2px 5px 3px #0007;
+opacity:0;transition:opacity .5s}
+.bridge-piece.built{opacity:1}
+#destination{position:absolute;z-index:12;left:43%;top:51%;
+width:14%;height:13%;padding:0;border:3px dashed #ffeb9d;
+background:#f4c46a55;box-shadow:0 0 20px #ffe181;
+border-radius:14px;display:grid;place-items:center;
+color:#fff;font-weight:bold;font-size:clamp(13px,2vw,23px);
+animation:pulse 1.5s infinite}
+@keyframes pulse{50%{box-shadow:0 0 30px #ffe181;background:#f4c46a88}}
+#destination.over{background:#8fffb1a0;border-color:#d5ffe2}
+#destination.error{background:#ff536d99;animation:shake .25s}
+@keyframes shake{25%{translate:-5px 0}75%{translate:5px 0}}
+#gate-glow{position:absolute;left:38%;top:0;width:12%;height:19%;
+border-radius:50% 50% 0 0;opacity:0;pointer-events:none;
+background:#ffdf7b77;box-shadow:0 0 45px #ffe485;transition:opacity 1s}
+#gate-glow.open{opacity:1}
+#chest{position:absolute;left:68%;top:17%;width:10%;height:12%;z-index:5;
+filter:drop-shadow(0 5px 4px #0008)}
+.chest-base{position:absolute;bottom:0;width:100%;height:60%;
+border:3px solid #ffdc75;border-radius:0 0 8px 8px;
+background:repeating-linear-gradient(90deg,#53336d 0 20%,
+#d0a044 21% 26%,#53336d 27% 45%)}
+.chest-lid{position:absolute;top:0;width:100%;height:47%;
+border:3px solid #ffe298;border-radius:50% 50% 0 0;
+background:linear-gradient(#9f6dc0,#654174);
+transform-origin:center bottom;transition:transform 1.2s}
+#chest.open .chest-lid{transform:translateY(-35%) rotate(-30deg)}
+#chest.open{filter:drop-shadow(0 0 22px #ffe67e)}
+#coins{position:absolute;inset:0;text-align:center;color:#ffe287;
+font-size:clamp(14px,3vw,34px);opacity:0;transition:opacity 1s}
+#chest.open #coins{opacity:1;animation:coins 1.4s infinite}
+@keyframes coins{50%{transform:translateY(-30px)}}
+#fog{position:absolute;right:0;top:0;width:29%;height:48%;z-index:9;
+pointer-events:none;background:radial-gradient(ellipse,#d9bdffdd,#d9bdff00 72%);
+filter:blur(8px);transition:opacity 1.8s}
+#fog.clear{opacity:0}
+.ripple{position:absolute;z-index:2;pointer-events:none;
+border:2px solid #b8fff7aa;border-radius:50%;
+width:8%;height:3%;animation:ripple 3s infinite}
+@keyframes ripple{0%{transform:scale(.5);opacity:.7}100%{transform:scale(2);opacity:0}}
+#map-note{position:absolute;left:12px;bottom:10px;z-index:13;
+padding:7px 12px;border:1px solid #ffe9a15c;background:#152b32d9;
+border-radius:10px;font-size:13px;max-width:90%}
+.task{margin-top:15px;padding:15px;background:#101d2bd9;
+border:1px solid #b59cda55;border-radius:16px;text-align:center}
+#question{font-size:clamp(27px,4vw,39px);line-height:1.8}
+#instruction{color:#ffe6a3;margin:5px 0}
+#inventory{display:grid;grid-template-columns:repeat(4,1fr);
+gap:12px;margin-top:15px}
+.item{min-height:95px;touch-action:none;user-select:none;
+font-weight:bold;font-size:25px;position:relative;
+border:2px solid #e2b87b;background:linear-gradient(145deg,#926134,#59371e);
+box-shadow:0 5px 0 #392819}
+.item.rune{background:linear-gradient(145deg,#64517c,#2c3046);
+border-color:#ccadf6}
+.item.gem{background:linear-gradient(145deg,#9c63c6,#352455);
+border-color:#f1c4ff}
+.item.selected{outline:3px solid #fff2b4;outline-offset:3px;
+box-shadow:0 0 25px #ffe096}
+.item.wrong{opacity:.4}
+.drag-ghost{position:fixed;z-index:100;pointer-events:none;
+padding:12px 20px;min-width:80px;border:2px solid #ffe09b;
+border-radius:12px;background:#69427de8;color:white;
+font-size:25px;transform:translate(-50%,-50%);box-shadow:0 8px 25px #0007}
+#feedback{min-height:52px;text-align:center;padding:15px;font-weight:bold}
+#next{display:none;margin:auto}
+#result{text-align:center;padding:40px 20px}
+#stars{color:#ffde87;font-size:58px}
+footer{text-align:center;font-size:13px;color:#adb8c7}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:80}
+@media(max-width:650px){
+header,main{padding:10px}.panel{padding:14px}.brand{font-size:13px}
+#inventory{grid-template-columns:1fr 1fr;gap:10px}
+.item{min-height:82px;font-size:23px}
+#map-note{font-size:10px;padding:4px 7px;bottom:5px;left:5px}
+#destination{border-width:2px;border-radius:7px}
+.task{padding:10px}#instruction{font-size:13px}
+}
+@media(prefers-reduced-motion:reduce){
+*,*:before,*:after{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<header>
+<div class="brand">MATHVERSE ✦</div>
+<button id="sound" aria-pressed="false">♫ Күйді қосу</button>
+</header>
+<main>
+<section id="setup" class="panel">
+<p>5-СЫНЫП · II ТОҚСАН</p>
+<h1>Қазына аралы</h1>
+<p>Көпірді құрастырыңыз, көне қақпаның кілтін алыңыз,
+сандықтың кристалдарын жинаңыз!</p>
+<label>Сабақ тақырыбы
+<input id="topic" list="topics" placeholder="Мысалы: Жай бөлшектерді қосу">
+</label>
+<datalist id="topics">
+<option value="Жай бөлшектерді ортақ бөлімге келтіру">
+<option value="Жай бөлшектерді салыстыру">
+<option value="Аралас сандарды салыстыру">
+<option value="Жай бөлшектерді қосу және азайту">
+<option value="Аралас сандарды қосу және азайту">
+<option value="Жай бөлшектерді көбейту">
+<option value="Аралас сандарды көбейту">
+<option value="Өзара кері сандар">
+<option value="Жай бөлшектерді бөлу">
+<option value="Аралас сандарды бөлу">
+</datalist>
+<div class="actions">
+<button id="generate" class="primary">✦ Саяхатты дайындау</button>
+<button id="start" hidden>Аралға аттану →</button>
+</div>
+<p id="notice" role="status"></p>
+<div id="preview"></div>
+</section>
+
+<section id="game" class="panel">
+<div class="hud">
+<strong id="stage"></strong><span id="score"></span>
+<button id="back">← Тақырыпқа қайту</button>
+</div>
+<div id="map">
+<div class="ripple" style="left:52%;top:68%"></div>
+<div class="ripple" style="left:75%;top:78%;animation-delay:1s"></div>
+<div id="bridge"></div>
+<div id="gate-glow"></div>
+<div id="chest">
+<div id="coins">✦ ✦ ✦</div>
+<div class="chest-base"></div><div class="chest-lid"></div>
+</div>
+<div id="fog"></div>
+<div id="player"><img src="./island-player.png" alt="Арал зерттеушісі"></div>
+<button id="destination" aria-label="Затты орналастыратын орын">↓</button>
+<div id="map-note"></div>
+</div>
+<div class="task">
+<div id="label"></div><div id="question"></div>
+<p id="instruction"></p>
+</div>
+<div id="inventory"></div>
+<div id="feedback" role="status" aria-live="polite"></div>
+<button id="next" class="primary">Жалғастыру →</button>
+</section>
+
+<section id="result" class="panel">
+<div id="stars"></div><h1>Аралдың қазынасы табылды!</h1>
+<p id="summary"></p>
+<button id="again" class="primary">Жаңа саяхат</button>
+<button id="choose">Тақырыпты өзгерту</button>
+</section>
+</main>
+<footer>Авторы: Қонысғали Нұрасыл · MATHVERSE</footer>
+<audio id="music" src="./adai.mp3" loop preload="none"></audio>
+<canvas id="confetti"></canvas>
+
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const rand=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const gcd=(a,b)=>b?gcd(b,a%b):Math.abs(a);
+function F(n,d=1){
+ if(!d)throw Error("Нөлге бөлу");
+ const g=gcd(n,d);return{n:n/g,d:d/g};
+}
+const equal=(a,b)=>a.n*b.d===b.n*a.d;
+const frac=(n,d)=>'<span class="frac"><span>'+n+
+'</span><span>'+d+'</span></span>';
+function show(a){
+ if(a.d===1)return String(a.n);
+ const w=Math.floor(a.n/a.d);
+ return(w?w+" ":"")+frac(a.n%a.d,a.d);
+}
+function proper(){const d=rand(2,12);return F(rand(1,d-1),d)}
+function mixed(){const a=proper();return F(rand(1,4)*a.d+a.n,a.d)}
+function shuffle(a){
+ for(let i=a.length-1;i>0;i--){
+ const j=rand(0,i);[a[i],a[j]]=[a[j],a[i]]}return a;
+}
+function parse(t){
+ t=t.toLowerCase();
+ if(t.includes("ортақ")&&t.includes("бөлім"))return["common"];
+ if(t.includes("салыстыр"))return[t.includes("аралас")?"mcompare":"compare"];
+ if(t.includes("кері"))return["inverse"];
+ const a=[],p=t.includes("аралас")?"m":"";
+ if(t.includes("қосу")||t.includes("қосынды"))a.push(p+"add");
+ if(t.includes("азайт")||t.includes("айырма"))a.push(p+"sub");
+ if(t.includes("көбей"))a.push(p+"mul");
+ if(t.includes("бөлу")||t.includes("бөлің"))a.push(p+"div");
+ return a;
+}
+function options(answer){
+ const a=[answer];let tries=0;
+ while(a.length<4&&tries++<100){
+ const b=F(rand(1,Math.max(15,answer.n+8)),rand(1,12));
+ if(!a.some(x=>equal(x,b)))a.push(b);
+ }
+ for(let i=1;a.length<4;i++){
+ const b=F(answer.n+i*answer.d,answer.d);
+ if(!a.some(x=>equal(x,b)))a.push(b);
+ }
+ return shuffle(a).map(x=>({html:show(x),correct:equal(x,answer)}));
+}
+function make(type){
+ if(type==="common"){
+ let a=proper(),b=proper();while(a.d===b.d)b=proper();
+ const d=a.d/gcd(a.d,b.d)*b.d,n=a.n*d/a.d,m=b.n*d/b.d;
+ const pair=(x,y)=>frac(x,d)+" және "+frac(y,d);
+ return{label:"Ең кіші ортақ бөлімге келтіріңіз",q:show(a)+" және "+show(b),
+ answer:pair(n,m),options:shuffle([
+ {html:pair(n,m),correct:true},{html:pair(n+1,m),correct:false},
+ {html:pair(n,m+1),correct:false},{html:pair(n+1,m+1),correct:false}])};
+ }
+ if(type==="inverse"){
+ const a=Math.random()<.5?proper():mixed(),r=F(a.d,a.n);
+ return{label:"Кері санды табыңыз",q:show(a),answer:show(r),options:options(r)};
+ }
+ const m=type.startsWith("m"),op=m?type.slice(1):type;
+ let a=m?mixed():proper(),b=m?mixed():proper();
+ if(op==="compare"){
+ const x=a.n*b.d-b.n*a.d,answer=x===0?"=":x>0?"&gt;":"&lt;";
+ return{label:"Қай белгі дұрыс?",q:show(a)+" ☐ "+show(b),answer,
+ options:shuffle(["&lt;","=","&gt;"].map(html=>({html,correct:html===answer})))};
+ }
+ if(op==="sub"&&a.n*b.d<b.n*a.d)[a,b]=[b,a];
+ let r,s;
+ if(op==="add"){r=F(a.n*b.d+b.n*a.d,a.d*b.d);s="+"}
+ if(op==="sub"){r=F(a.n*b.d-b.n*a.d,a.d*b.d);s="−"}
+ if(op==="mul"){r=F(a.n*b.n,a.d*b.d);s="×"}
+ if(op==="div"){r=F(a.n*b.d,a.d*b.n);s="÷"}
+ return{label:"Есептеңіз",q:show(a)+" "+s+" "+show(b),
+ answer:show(r),options:options(r)};
+}
+let tasks=[],step=0,points=0,perfect=0,first=true,busy=false;
+let selected=null,epoch=0,keyReady=false;
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+function generate(){
+ const types=parse($("topic").value);
+ if(!types.length){
+ tasks=[];$("start").hidden=true;$("preview").replaceChildren();
+ $("notice").textContent="Тақырып танылмады. Тізімдегі тақырыпты таңдаңыз.";
+ return false;
+ }
+ tasks=[];const seen=new Set();let tries=0;
+ while(tasks.length<8&&tries++<1000){
+ const t=make(types[rand(0,types.length-1)]);
+ if(!seen.has(t.q)){seen.add(t.q);tasks.push(t)}
+ }
+ $("preview").innerHTML="<p>Мұғалімге алдын ала қарау · 8 тапсырма</p>"+
+ tasks.map((t,i)=>'<div class="preview"><span>'+(i+1)+'. '+t.q+
+ '</span><span style="color:#b7efcf">'+t.answer+'</span></div>').join("");
+ $("notice").textContent="3 тақтай, 2 қақпа коды, 3 қазына кристалы дайын.";
+ $("start").hidden=false;return true;
+}
+$("generate").onclick=generate;
+$("topic").oninput=()=>{
+ tasks=[];$("start").hidden=true;$("preview").replaceChildren();
+ $("notice").textContent="";
+};
+const bridgePoints=[{x:41,y:57},{x:46,y:51},{x:51,y:45}];
+bridgePoints.forEach(p=>{
+ const b=document.createElement("div");b.className="bridge-piece";
+ b.style.left=p.x+"%";b.style.top=p.y+"%";$("bridge").append(b);
+});
+function placePlayer(x,y,w){
+ $("player").style.left=x+"%";$("player").style.top=y+"%";
+ $("player").style.width=w+"%";
+}
+async function walk(path,ticket){
+ const reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
+ $("player").classList.add("walking");
+ for(const p of path){
+ if(ticket!==epoch)return;
+ const a={x:parseFloat($("player").style.left),
+ y:parseFloat($("player").style.top),w:parseFloat($("player").style.width)};
+ const duration=reduced?1:650,start=performance.now();
+ await new Promise(resolve=>{
+ function frame(now){
+ if(ticket!==epoch){resolve();return}
+ const t=Math.min(1,(now-start)/duration);
+ placePlayer(a.x+(p.x-a.x)*t,a.y+(p.y-a.y)*t,a.w+(p.w-a.w)*t);
+ if(t<1)requestAnimationFrame(frame);else resolve();
+ }requestAnimationFrame(frame);
+ });
+ }
+ if(ticket===epoch)$("player").classList.remove("walking");
+}
+function start(){
+ if(!tasks.length&&!generate())return;
+ epoch++;step=0;points=0;perfect=0;busy=false;keyReady=false;
+ $("bridge").querySelectorAll(".bridge-piece").forEach(b=>b.classList.remove("built"));
+ $("fog").classList.remove("clear");$("chest").classList.remove("open");
+ $("gate-glow").classList.remove("open");
+ placePlayer(17,79,8.5);$("player").classList.remove("walking");
+ $("setup").style.display="none";$("result").style.display="none";
+ $("game").style.display="block";render();
+}
+function target(x,y,w,h,text){
+ const d=$("destination");
+ d.style.left=x+"%";d.style.top=y+"%";d.style.width=w+"%";d.style.height=h+"%";
+ d.textContent=text;d.hidden=false;d.disabled=false;
+}
+function render(){
+ busy=false;first=true;selected=null;keyReady=false;
+ $("next").style.display="none";$("inventory").replaceChildren();
+ $("score").textContent="✦ "+points+" ұпай";
+ $("label").textContent=tasks[step].label;
+ $("question").innerHTML=tasks[step].q;
+ $("feedback").textContent="Затты сүйреңіз немесе затты, кейін орнын басыңыз.";
+ let itemClass;
+ if(step<3){
+ $("stage").textContent="1-кезең · Көпір "+(step+1)+"/3";
+ $("instruction").textContent="Дұрыс жауап жазылған тақтайды көпірдегі белгіге апарыңыз.";
+ const p=bridgePoints[step];target(p.x-6,p.y-5,12,10,"↓");
+ $("map-note").textContent="Көпірге тағы "+(3-step)+" тақтай қажет";
+ itemClass="";
+ }else if(step<5){
+ $("stage").textContent="2-кезең · Қақпа коды "+(step-2)+"/2";
+ $("instruction").textContent="Дұрыс таңбаны көне қақпаға орналастырыңыз.";
+ target(39,5,10,13,"✦");
+ $("map-note").textContent="Көне қақпаның екі кодын шешіңіз";
+ itemClass="rune";
+ }else{
+ $("stage").textContent="3-кезең · Қазына кристалы "+(step-4)+"/3";
+ $("instruction").textContent="Дұрыс жауапты кристалды сандыққа апарыңыз.";
+ target(68,16,11,14,"◇");
+ $("map-note").textContent="Сандыққа "+(8-step)+" кристалл қажет";
+ itemClass="gem";
+ }
+ tasks[step].options.forEach(opt=>addItem(opt,itemClass));
+}
+function addItem(opt,kind){
+ const b=document.createElement("button");
+ b.className="item "+kind;b.innerHTML=opt.html;
+ b.setAttribute("aria-label","Жауапты таңдау");
+ b._option=opt;
+ b.onclick=()=>{
+ if(busy||b.disabled)return;
+ if(selected)selected.classList.remove("selected");
+ selected=b;b.classList.add("selected");
+ $("feedback").textContent="Енді картадағы жарқыраған орынды басыңыз.";
+ };
+ b.onpointerdown=e=>drag(e,b);
+ $("inventory").append(b);
+}
+let dragState=null;
+function cancelDrag(){
+ if(!dragState)return;
+ dragState.ghost?.remove();dragState=null;
+ $("destination").classList.remove("over");
+}
+function drag(e,b){
+ if(busy||b.disabled||e.button!==0)return;
+ cancelDrag();
+ dragState={b,id:e.pointerId,x:e.clientX,y:e.clientY,moved:false,ghost:null};
+ b.setPointerCapture(e.pointerId);
+}
+document.addEventListener("pointermove",e=>{
+ const s=dragState;if(!s||s.id!==e.pointerId)return;
+ if(Math.hypot(e.clientX-s.x,e.clientY-s.y)>8)s.moved=true;
+ if(!s.moved)return;
+ if(!s.ghost){
+ s.ghost=document.createElement("div");s.ghost.className="drag-ghost";
+ s.ghost.innerHTML=s.b.innerHTML;document.body.append(s.ghost);
+ }
+ s.ghost.style.left=e.clientX+"px";s.ghost.style.top=e.clientY+"px";
+ const r=$("destination").getBoundingClientRect();
+ $("destination").classList.toggle("over",
+ e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom);
+});
+document.addEventListener("pointerup",e=>{
+ const s=dragState;if(!s||s.id!==e.pointerId)return;
+ const r=$("destination").getBoundingClientRect();
+ const inside=e.clientX>=r.left&&e.clientX<=r.right&&
+ e.clientY>=r.top&&e.clientY<=r.bottom;
+ const moved=s.moved,b=s.b;cancelDrag();
+ if(moved&&inside)submit(b);
+});
+document.addEventListener("pointercancel",cancelDrag);
+$("destination").onclick=()=>{
+ if(selected&&!busy)submit(selected);
+ else if(!busy)$("feedback").textContent="Алдымен төменнен затты таңдаңыз.";
+};
+async function submit(b){
+ if(busy||b.disabled)return;
+ busy=true;cancelDrag();const ticket=epoch;
+ $("inventory").querySelectorAll("button").forEach(x=>x.disabled=true);
+ if(!b._option.correct){
+ first=false;b.dataset.wrong="1";b.classList.add("wrong");
+ $("destination").classList.add("error");
+ $("feedback").textContent="Бұл зат сәйкес келмеді. Қайта есептеп көріңіз.";
+ tone(false);
+ await wait(500);if(ticket!==epoch)return;
+ $("destination").classList.remove("error");
+ $("inventory").querySelectorAll("button").forEach(x=>x.disabled=x.dataset.wrong==="1");
+ selected=null;b.classList.remove("selected");busy=false;return;
+ }
+ $("destination").hidden=true;b.classList.remove("selected");
+ if(keyReady){
+ $("gate-glow").classList.add("open");$("fog").classList.add("clear");
+ $("feedback").textContent="Кілт бұрылды! Қазынаға жол ашылды!";
+ tone(true);
+ await walk([{x:54,y:28,w:6},{x:62,y:30,w:6},
+ {x:69,y:25,w:5.5}],ticket);
+ if(ticket!==epoch)return;
+ step=5;render();return;
+ }
+ points+=first?10:5;if(first)perfect++;
+ $("score").textContent="✦ "+points+" ұпай";tone(true);
+ if(step<3){
+ $("bridge").children[step].classList.add("built");
+ $("feedback").textContent="Тақтай орнына түсті! +"+(first?10:5)+" ұпай";
+ await wait(600);if(ticket!==epoch)return;
+ if(step===2){
+ $("feedback").textContent="Көпір дайын! Зерттеуші өзеннен өтіп жатыр.";
+ await walk([{x:34,y:65,w:8},{x:41,y:57,w:7.6},
+ {x:46,y:51,w:7.2},{x:51,y:45,w:6.8},
+ {x:56,y:39,w:6.5},{x:46,y:24,w:6}],ticket);
+ if(ticket!==epoch)return;
+ }
+ }else if(step<5){
+ $("feedback").textContent="Қақпаның коды қабылданды! +"+(first?10:5)+" ұпай";
+ await wait(650);if(ticket!==epoch)return;
+ if(step===4){
+ keyReady=true;busy=false;selected=null;$("inventory").replaceChildren();
+ $("question").textContent="Кілт табылды!";
+ $("instruction").textContent="Кілтті қақпаға апарып ашыңыз.";
+ $("label").textContent="Келесі аймаққа өту";
+ $("map-note").textContent="Кілтті пайдаланыңыз";
+ target(39,5,10,13,"🔑");
+ addItem({html:"🔑",correct:true},"rune");
+ return;
+ }
+ }else{
+ $("chest").style.filter="drop-shadow(0 0 "+(14+(step-5)*10)+"px #ffe28b)";
+ $("feedback").textContent="Кристалл сандыққа орналасты! +"+(first?10:5)+" ұпай";
+ await wait(600);if(ticket!==epoch)return;
+ if(step===7){
+ $("chest").classList.add("open");
+ $("map-note").textContent="Қазына табылды!";
+ $("feedback").textContent="Сандық ашылды! Аралдың құпиясын шештіңіз!";
+ celebrate();
+ await wait(1600);if(ticket!==epoch)return;
+ $("next").textContent="Нәтижені көру →";
+ $("next").style.display="block";return;
+ }
+ }
+ step++;render();
+}
+$("next").onclick=()=>{
+ if(step!==7)return;
+ epoch++;$("game").style.display="none";$("result").style.display="block";
+ const r=points/80;
+ $("stars").textContent=r>=.9?"★★★":r>=.65?"★★☆":"★☆☆";
+ $("summary").textContent=points+" / 80 ұпай. Алғашқы әрекеттен дұрыс: "+
+ perfect+" / 8. Көпір құрастырылды, қақпа ашылды, қазына табылды!";
+ celebrate();
+};
+function back(){
+ epoch++;cancelDrag();$("player").classList.remove("walking");
+ $("game").style.display="none";$("result").style.display="none";
+ $("setup").style.display="block";
+}
+$("start").onclick=start;$("back").onclick=back;$("choose").onclick=back;
+$("again").onclick=()=>{if(generate())start()};
+$("player").querySelector("img").onerror=()=>{
+ $("notice").textContent="island-player.png файлы ашылмады.";
+ $("map-note").textContent="Кейіпкер файлын тексеріңіз";
+};
+
+let sound=false,ctx;
+$("sound").onclick=async()=>{
+ if(sound){$("music").pause();sound=false}
+ else{
+ try{
+ $("music").volume=.2;await $("music").play();sound=true;
+ const AC=window.AudioContext||window.webkitAudioContext;
+ if(AC){ctx=ctx||new AC();await ctx.resume()}
+ }catch(e){alert("adai.mp3 файлы ашылмады.")}
+ }
+ $("sound").textContent=sound?"♫ Күйді өшіру":"♫ Күйді қосу";
+ $("sound").setAttribute("aria-pressed",String(sound));
+};
+function tone(ok){
+ if(!sound||!ctx)return;
+ [ok?523:160,ok?784:100].forEach((f,i)=>{
+ const o=ctx.createOscillator(),g=ctx.createGain(),t=ctx.currentTime+i*.1;
+ o.connect(g);g.connect(ctx.destination);o.frequency.value=f;
+ g.gain.setValueAtTime(.04,t);g.gain.exponentialRampToValueAtTime(.001,t+.25);
+ o.start(t);o.stop(t+.25);
+ });
+}
+let anim;
+function celebrate(){
+ if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+ cancelAnimationFrame(anim);
+ const c=$("confetti"),g=c.getContext("2d");
+ c.width=innerWidth;c.height=innerHeight;
+ const bits=Array.from({length:100},()=>({
+ x:Math.random()*c.width,y:-Math.random()*c.height,
+ v:2+Math.random()*5,color:["#ffe190","#d9adff","#8aefd3"][rand(0,2)]}));
+ const begin=performance.now();
+ function draw(now){
+ g.clearRect(0,0,c.width,c.height);
+ bits.forEach(p=>{p.y+=p.v;g.fillStyle=p.color;g.fillRect(p.x,p.y,6,10)});
+ if(now-begin<3000)anim=requestAnimationFrame(draw);
+ else g.clearRect(0,0,c.width,c.height);
+ }anim=requestAnimationFrame(draw);
+}
+</script>
+</body>
+  </html>
