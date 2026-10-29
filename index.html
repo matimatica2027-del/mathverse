@@ -2408,7 +2408,54 @@ searchInput?.addEventListener("input", () => {
           }
         };
 
-        card.append(title, details, state, edit, publish);
+        const remove = document.createElement("button");
+remove.type = "button";
+remove.textContent = "Өшіру";
+remove.style.cssText =
+  "margin-left:8px;color:#b42318;background:#fee4e2";
+
+remove.onclick = async () => {
+  if (busy) return;
+  if (!confirm("«" + item.title +
+      "» материалын біржола өшіресіз бе?")) return;
+
+  busy = true;
+  const current = ++version;
+  section.querySelectorAll("button")
+    .forEach(button => button.disabled = true);
+  message.textContent = "Өшірілуде…";
+
+  try {
+    await requireAdmin();
+    if (current !== version) return;
+
+    const { data, error } = await client
+      .from("mathverse_materials")
+      .delete()
+      .eq("id", item.id)
+      .select("id");
+
+    if (current !== version) return;
+    if (error) throw error;
+    if (!data?.length) {
+      throw new Error("Жою рұқсатын тексеру қажет.");
+    }
+
+    busy = false;
+    offset = 0;
+    await load();
+  } catch (error) {
+    if (current === version) {
+      message.textContent = "Өшірілмеді: " + error.message;
+    }
+  } finally {
+    busy = false;
+    section.querySelectorAll("button")
+      .forEach(button => button.disabled = false);
+  }
+};
+
+card.append(title, details, state, edit, publish, remove);
         list.append(card);
       });
 
