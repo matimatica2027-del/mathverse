@@ -2066,6 +2066,16 @@ searchInput?.addEventListener("input", () => {
   let version = 0;
 
   function subjects() {
+    const track = form.elements.namedItem("track");
+const trackLabel = form.querySelector("#mv-admin-track-label");
+const upperGrade = [10, 11].includes(Number(grade.value));
+
+trackLabel.hidden = !upperGrade;
+trackLabel.style.display = upperGrade ? "block" : "none";
+track.disabled = !upperGrade;
+track.required = upperGrade;
+
+if (!upperGrade) track.value = "";
     const names = Number(grade.value) <= 6
       ? ["Математика"]
       : ["Алгебра", "Геометрия"];
