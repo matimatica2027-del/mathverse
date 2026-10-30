@@ -2151,6 +2151,9 @@ if (!upperGrade) track.value = "";
           grade: Number(values.get("grade")),
           term: 2,
           subject: values.get("subject"),
+          track: [10, 11].includes(Number(values.get("grade")))
+  ? values.get("track")
+  : null,
           topic: String(values.get("topic")).trim(),
           category: values.get("category"),
           file_path: filePath,
